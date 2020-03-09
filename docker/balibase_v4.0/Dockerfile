@@ -19,6 +19,7 @@ RUN wget http://www.lbgi.fr/balibase/BalibaseDownload/BAliBASE_R10_bali_score.ta
     make install && \
     cd ..
 
+
 COPY makefile_balibase bali_score_src/makefile
 COPY util.c bali_score_src/util.c
 

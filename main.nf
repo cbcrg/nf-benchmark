@@ -32,6 +32,11 @@ nextflow.preview.dsl = 2
 include tcoffee from  './modules/tcoffee/main.nf'
 include bali_base from './modules/bali_base/main.nf'
 
+// alignment BBA0001
+params.sequences = "$baseDir/test/sequences/input/BBA0001.tfa"
+params.reference = "$baseDir/test/sequences/reference/BBA0001.xml"
+
+// aligment BB11001
 params.sequences = "$baseDir/test/sequences/input/BB11001.fa"
 params.reference = "$baseDir/test/sequences/reference/BB11001.xml.ref"
 

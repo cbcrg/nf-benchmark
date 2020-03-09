@@ -1,5 +1,5 @@
 FROM pditommaso/dkrbase:1.2
-MAINTAINER Luisa Santus <luisa.santus@hotmail.it>
+MAINTAINER Jose Espinosa-Carrasco <espinosacarrascoj@gmail.com>
 
 #Install MView for file-format conversion
 
@@ -10,11 +10,7 @@ RUN cd usr/local/ &&\
  unzip master.zip &&\
  rm -rf master.zip &&\
  cd mview-master &&\
- sed -i -- 's/#\!\/usr\/bin\/env perl/\#\!\/usr\/bin\/perl/g' bin/mview &&\
- sed -i -- 's/\/home\/brown\/HOME\/work\/MView\/dev\/lib/\/usr\/local\/mview-master\/lib/g' bin/mview
-
-
-ENV PATH /usr/local/mview-master/bin:$PATH
+ perl install.pl /usr/local/bin
 
 #Install bali_score
 

@@ -29,8 +29,56 @@
 
 nextflow.preview.dsl = 2
 
-include tcoffee from  './modules/tcoffee/main.nf'
+@Grab(group='org.yaml', module='snakeyaml', version='1.5')
+import org.yaml.snakeyaml.Yaml
+
+def configText = '''\
+name: 'test-api'
+repo: 'http://github.com/.../test-api.git'
+tests:
+  - Unit
+  - QA
+vpc: 'development'
+'''
+
+def yaml = new Yaml()
+
+def config = yaml.load(configText)
+println (config.name)
+
+// params --> pipeline
+
+// if the pipeline is present then run it and the corresponding benchmark.
+// check for pipeline or method (think about the naming)
+
+// 1 check for the pipeline/method provided in the parameters
+// 2 include the method
+// 3 run the method
+//      (think about the input data and reference data)
+// 4 benchmarker checks the input
+//               checks the output
+//               runs the benchmark
+
+// YML parse in order to know which is the input format and the output format
+// then the benchmarker should take the reference data
+
+pipeline_module = file( "./modules/${params.pipeline}/main.nf")
+
+if( !pipeline_module.exists() ) exit 1, "Error: The selected pipeline is not included in nf-benchmark: ${params.pipeline}"
+
+// include tcoffee from  './modules/tcoffee/main.nf'
+include tcoffee from  "./modules/${params.pipeline}/main.nf"
+
+pipeline = "${baseDir}/modules/${params.pipeline}/meta.yml"
+def yaml_pipeline = new Yaml()
+println (pipeline)
+
+def pipeline_config = yaml.load( pipeline )
+println (pipeline_config.name)
+
+return
 include bali_base from './modules/bali_base/main.nf'
+// include benchmarker from './modules/${benchmark}/main.nf'
 
 // alignment BBA0001
 params.sequences = "$baseDir/test/sequences/input/BBA0001.tfa"

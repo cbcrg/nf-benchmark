@@ -11,6 +11,9 @@ process tcoffee {
 
     script:
     """
-    t_coffee -in $fasta -outfile ${fasta}.aln.fasta -output fasta
+    t_coffee -multi_core=$task.cpus -in=$fasta -output msf -run_name aln
+    t_coffee -other_pg seq_reformat aln.msf -output fasta > ${fasta}.aln.fasta
     """
 }
+
+// t_coffee -in $fasta -outfile ${fasta}.aln.fasta -output fasta

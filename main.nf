@@ -66,18 +66,15 @@ pipeline_module = file( "./modules/${params.pipeline}/main.nf")
 
 if( !pipeline_module.exists() ) exit 1, "Error: The selected pipeline is not included in nf-benchmark: ${params.pipeline}"
 
-// include tcoffee from  './modules/tcoffee/main.nf'
-include tcoffee from  "./modules/${params.pipeline}/main.nf"
+include pipeline from  "./modules/${params.pipeline}/main.nf"
 
-pipeline = "${baseDir}/modules/${params.pipeline}/meta.yml"
-def yaml_pipeline = new Yaml()
-println (pipeline)
+def file = new File("./modules/${params.pipeline}/meta.yml")
+def pipeline_config = yaml.load(file.text)
 
-def pipeline_config = yaml.load( pipeline )
-println (pipeline_config.name)
+println("Selected pipeline name is: ${pipeline_config.name}")
+benchmarker = "bali_base"
+include benchmark from "./modules/${benchmarker}/main.nf"
 
-return
-include bali_base from './modules/bali_base/main.nf'
 // include benchmarker from './modules/${benchmark}/main.nf'
 
 // alignment BBA0001
@@ -98,8 +95,9 @@ params.reference = "$baseDir/test/sequences/reference/BB11001.xml.ref"
 
 // Run the workflow
 workflow {
-    tcoffee(params.sequences)
-    bali_base(tcoffee.out, params.reference)
+    pipeline(params.sequences)
+    benchmark(pipeline.out, params.reference)
+    // bali_base(pipeline.out, params.reference)
     // nf-benchmark()
     // .check_output()
 }

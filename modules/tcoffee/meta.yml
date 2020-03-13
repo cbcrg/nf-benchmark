@@ -23,7 +23,7 @@ input:
             edam_format: format_1929
             format: fasta
             description: Input fasta file with a set of alignments
-            pattern: *.{fasta,fa,tfa}
+            pattern: '*.{fasta,fa,tfa}'
 output:
     -
         - alignment:
@@ -32,6 +32,6 @@ output:
             edam_format: format_1984
             format: fasta alignment
             description: fasta alignment file
-            pattern: *.{fasta,fa,tfa}
+            pattern: '*.{fasta,fa,tfa}'
 authors:
-    - @JoseEspinosa
+    - '@JoseEspinosa'

@@ -1,11 +1,11 @@
-name: t-coffee
+name: tcoffee
 description: Run tcofee multiple sequence alignment
 keywords:
     - MSA
     - multiple sequence aligment
     - sequence aligment
 pipeline:
-    - t-coffee:
+    - tcoffee:
         description: |
             T-Coffee is a multiple sequence alignment package.
             It uses a progressive approach and a consistency objective
@@ -30,7 +30,7 @@ output:
             type: file
             edam_data: data_1384
             edam_format: format_1984
-            format: fasta alignment
+            format: fasta_alignment
             description: fasta alignment file
             pattern: '*.{fasta,fa,tfa}'
 authors:

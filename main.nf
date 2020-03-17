@@ -34,22 +34,6 @@ import org.yaml.snakeyaml.Yaml
 
 def yaml = new Yaml()
 
-// params --> pipeline
-
-// if the pipeline is present then run it and the corresponding benchmark.
-// check for pipeline or method (think about the naming)
-
-// 1 check for the pipeline/method provided in the parameters
-// 2 include the method
-// 3 run the method
-//      (think about the input data and reference data)
-// 4 benchmarker checks the input
-//               checks the output
-//               runs the benchmark
-
-// YML parse in order to know which is the input format and the output format
-// then the benchmarker should take the reference data
-
 pipeline_module = file( "./modules/${params.pipeline}/main.nf")
 
 if( !pipeline_module.exists() ) exit 1, "Error: The selected pipeline is not included in nf-benchmark: ${params.pipeline}"
@@ -57,7 +41,6 @@ if( !pipeline_module.exists() ) exit 1, "Error: The selected pipeline is not inc
 include pipeline from  "./modules/${params.pipeline}/main.nf"
 
 yamlPath = "./modules/${params.pipeline}/meta.yml"
-// def file = new File("./modules/${params.pipeline}/meta.yml")
 def file = new File(yamlPath)
 def pipelineConfig = yaml.load(file.text)
 
@@ -81,13 +64,9 @@ def setBenchmark (configYmlFile) {
     input_format = pipelineConfig.input.fasta.edam_format[0][0]
     output_format = pipelineConfig.output.alignment.edam_format[0][0]
 
-    // println(input_format)
-    // println(output_format)
-
     Channel
         .fromPath( "/home/kadomu/git/nf-benchmark/assets/methods2benchmark.csv" )
         .splitCsv(header: true)
-        // .filter { row -> row.edam_input_format == "format_1929" && row.edam_output_format == "format_1984" }
         .filter { row ->
                   row.edam_operation == operation  &&
                   row.edam_input_data == input_data &&
@@ -95,23 +74,17 @@ def setBenchmark (configYmlFile) {
                   row.edam_output_data == output_data &&
                   row.edam_output_format == output_format
         }
-        .view()
-//        .subscribe { row ->
-//       println "-${row}"
-//    }
-    println("-----------------")
+
     return "bali_base"
 }
 
 String benchmarker = setBenchmark(yamlPath)
 
-//benchmarker = "bali_base"
 include benchmark from "./modules/${benchmarker}/main.nf"
 
-println("Benchmark set to: ${benchmarker}")
+println("INFO: Benchmark set to: ${benchmarker}")
 
-// I think that input and reference must be declared or otherwise kept in a csv (or DB)
-
+// Define input channels
 // alignment BBA0001
 params.sequences = "$baseDir/test/sequences/input/BBA0001.tfa"
 params.reference = "$baseDir/test/sequences/reference/BBA0001.xml"
@@ -126,13 +99,8 @@ params.reference = "$baseDir/test/sequences/reference/BBA0001.xml"
  sequences: ${params.sequences}
  """
 
-// Define input channels
-
 // Run the workflow
 workflow {
     pipeline(params.sequences)
     benchmark(pipeline.out, params.reference)
-    // bali_base(pipeline.out, params.reference)
-    // nf-benchmark()
-    // .check_output()
 }

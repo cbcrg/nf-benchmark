@@ -70,20 +70,32 @@ def setBenchmark (configYmlFile) {
     def yaml = new Yaml()
     def pipelineConfig = yaml.load(file.text)
 
-    println("Selected pipeline name is: ${pipelineConfig.name}")
-    println("Selected edam topic is: ${pipelineConfig.pipeline.tcoffee.edam_topic[0]}")
+    println("INFO: Selected pipeline name is: ${pipelineConfig.name}")
+    println("INFO: Selected edam topic is: ${pipelineConfig.pipeline.tcoffee.edam_topic[0]}")
+    println("INFO: Selected edam operation is: ${pipelineConfig.pipeline.tcoffee.edam_operation[0]}")
+    println("INFO: Input format is: ${pipelineConfig.input.fasta.edam_format[0]}")
 
-    println("Input format is: ${pipelineConfig.input.fasta.edam_format[0]}")
+    topic = pipelineConfig.pipeline.tcoffee.edam_topic[0]
+    operation = pipelineConfig.pipeline.tcoffee.edam_operation[0]
+
     input_format = pipelineConfig.input.fasta.edam_format[0][0]
     output_format = pipelineConfig.output.alignment.edam_format[0][0]
-    println(input_format)
-    println(output_format)
+
+    // println(input_format)
+    // println(output_format)
+
     Channel
         .fromPath( "/home/kadomu/git/nf-benchmark/assets/methods2benchmark.csv" )
         .splitCsv(header: true)
         // .filter { row -> row.edam_input_format == "format_1929" && row.edam_output_format == "format_1984" }
-         .filter { row -> row.edam_input_format == input_format && row.edam_output_format == output_format }
-        .println()
+        .filter { row ->
+                  row.edam_operation == operation  &&
+                  row.edam_input_data == input_data &&
+                  row.edam_input_format == input_format &&
+                  row.edam_output_data == output_data &&
+                  row.edam_output_format == output_format
+        }
+        .view()
 //        .subscribe { row ->
 //       println "-${row}"
 //    }

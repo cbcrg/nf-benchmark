@@ -52,19 +52,18 @@ def yaml = new Yaml()
 
 pipeline_module = file( "./modules/${params.pipeline}/main.nf")
 
-if( !pipeline_module.exists() ) exit 1, "Error: The selected pipeline is not included in nf-benchmark: ${params.pipeline}"
+if( !pipeline_module.exists() ) exit 1, "ERROR: The selected pipeline is not included in nf-benchmark: ${params.pipeline}"
 
 include pipeline from  "./modules/${params.pipeline}/main.nf"
 
 yamlPath = "./modules/${params.pipeline}/meta.yml"
-// def file = new File("./modules/${params.pipeline}/meta.yml")
 def file = new File(yamlPath)
 def pipelineConfig = yaml.load(file.text)
 
-println("Selected pipeline name is: ${pipelineConfig.name}")
+println("INFO: Selected pipeline name is \"${pipelineConfig.name}\"")
 
 def setBenchmark (configYmlFile) {
-    println("file path: ${configYmlFile}")
+    println("INFO: Path to yaml pipeline configuration file \"${configYmlFile}\"")
 
     def file = new File(configYmlFile)
     def yaml = new Yaml()
@@ -87,44 +86,37 @@ def setBenchmark (configYmlFile) {
     println("INFO: Output data is: $output_data")
     println("INFO: Output format is: ${output_format}")
 
-    // Read csv file also using groovy libraries
-    bc = Channel.fromPath( "$baseDir/assets/methods2benchmark.csv" )
-           .splitCsv(header: true)
-           .filter { row ->
+    Channel
+        .fromPath( "$baseDir/assets/methods2benchmark.csv" )
+        .splitCsv(header: true)
+        .filter { row ->
             row.edam_operation == operation  &&
             row.edam_input_data == input_data &&
             row.edam_input_format == input_format &&
             row.edam_output_data == output_data &&
             row.edam_output_format == output_format
-           }
-           .map {
-            it.benchmark
-           }
+        }
+        .map { it.benchmark }
+        .set { benchmark }
 
-    (benchmark, benchmark_check) = bc.into(2)
-
-     benchmark_check.count().subscribe {
-                    if ( it > 1 ) exit 1, "Error: More than one possible benchmark please refine pipeline description for \"${params.pipeline}\" pipeline"
-                    if ( it == 0 ) exit 1, "Error: The selected pipeline  \"${params.pipeline}\" is not included in nf-benchmark"
-                 }
+     benchmark
+        .count()
+        .subscribe {
+            if ( it > 1 ) exit 1, "Error: More than one possible benchmark please refine pipeline description for \"${params.pipeline}\" pipeline"
+            if ( it == 0 ) exit 1, "Error: The selected pipeline  \"${params.pipeline}\" is not included in nf-benchmark"
+        }
 
     return benchmark
 }
 
-//maybe I can use directly the channel!!! thing about it
 benchmark = setBenchmark(yamlPath)
 
 benchmark.view()
-return
 
-// String benchmarker = setBenchmark(yamlPath)
-
-//benchmarker = "bali_base"d
+benchmarker = "bali_base"
 include benchmark from "./modules/${benchmarker}/main.nf"
 
-println("Benchmark set to: ${benchmarker}")
-
-// I think that input and reference must be declared or otherwise kept in a csv (or DB)
+println("INFO: Benchmark set to: ${benchmarker}")
 
 // alignment BBA0001
 params.sequences = "$baseDir/test/sequences/input/BBA0001.tfa"
@@ -139,8 +131,6 @@ params.reference = "$baseDir/test/sequences/reference/BBA0001.xml"
  ===================================
  sequences: ${params.sequences}
  """
-
-// Define input channels
 
 // Run the workflow
 workflow {

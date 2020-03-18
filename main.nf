@@ -34,22 +34,6 @@ import org.yaml.snakeyaml.Yaml
 
 def yaml = new Yaml()
 
-// params --> pipeline
-
-// if the pipeline is present then run it and the corresponding benchmark.
-// check for pipeline or method (think about the naming)
-
-// 1 check for the pipeline/method provided in the parameters
-// 2 include the method
-// 3 run the method
-//      (think about the input data and reference data)
-// 4 benchmarker checks the input
-//               checks the output
-//               runs the benchmark
-
-// YML parse in order to know which is the input format and the output format
-// then the benchmarker should take the reference data
-
 pipeline_module = file( "./modules/${params.pipeline}/main.nf")
 
 if( !pipeline_module.exists() ) exit 1, "ERROR: The selected pipeline is not included in nf-benchmark: ${params.pipeline}"
@@ -107,6 +91,7 @@ def setBenchmark (configYmlFile) {
         }
 
     return benchmark
+
 }
 
 benchmark = setBenchmark(yamlPath)
@@ -118,6 +103,7 @@ include benchmark from "./modules/${benchmarker}/main.nf"
 
 println("INFO: Benchmark set to: ${benchmarker}")
 
+// Define input channels
 // alignment BBA0001
 params.sequences = "$baseDir/test/sequences/input/BBA0001.tfa"
 params.reference = "$baseDir/test/sequences/reference/BBA0001.xml"
@@ -136,7 +122,4 @@ params.reference = "$baseDir/test/sequences/reference/BBA0001.xml"
 workflow {
     pipeline(params.sequences)
     benchmark(pipeline.out, params.reference)
-    // bali_base(pipeline.out, params.reference)
-    // nf-benchmark()
-    // .check_output()
 }

@@ -36,7 +36,7 @@ def yaml = new Yaml()
 
 pipeline_module = file( "./modules/${params.pipeline}/main.nf")
 
-if( !pipeline_module.exists() ) exit 1, "Error: The selected pipeline is not included in nf-benchmark: ${params.pipeline}"
+if( !pipeline_module.exists() ) exit 1, "ERROR: The selected pipeline is not included in nf-benchmark: ${params.pipeline}"
 
 include pipeline from  "./modules/${params.pipeline}/main.nf"
 
@@ -44,42 +44,61 @@ yamlPath = "./modules/${params.pipeline}/meta.yml"
 def file = new File(yamlPath)
 def pipelineConfig = yaml.load(file.text)
 
-println("Selected pipeline name is: ${pipelineConfig.name}")
+println("INFO: Selected pipeline name is \"${pipelineConfig.name}\"")
 
 def setBenchmark (configYmlFile) {
-    println("file path: ${configYmlFile}")
+    println("INFO: Path to yaml pipeline configuration file \"${configYmlFile}\"")
 
     def file = new File(configYmlFile)
     def yaml = new Yaml()
     def pipelineConfig = yaml.load(file.text)
 
-    println("INFO: Selected pipeline name is: ${pipelineConfig.name}")
-    println("INFO: Selected edam topic is: ${pipelineConfig.pipeline.tcoffee.edam_topic[0]}")
-    println("INFO: Selected edam operation is: ${pipelineConfig.pipeline.tcoffee.edam_operation[0]}")
-    println("INFO: Input format is: ${pipelineConfig.input.fasta.edam_format[0]}")
-
     topic = pipelineConfig.pipeline.tcoffee.edam_topic[0]
     operation = pipelineConfig.pipeline.tcoffee.edam_operation[0]
 
+    input_data = pipelineConfig.input.fasta.edam_data[0][0]
     input_format = pipelineConfig.input.fasta.edam_format[0][0]
+    output_data = pipelineConfig.output.alignment.edam_data[0][0]
     output_format = pipelineConfig.output.alignment.edam_format[0][0]
 
+    println("INFO: Selected pipeline name is: ${pipelineConfig.name}")
+    println("INFO: Selected edam topic is: $topic")
+    println("INFO: Selected edam operation is: $operation")
+
+    println("INFO: Input data is: $input_data")
+    println("INFO: Input format is: ${input_format}")
+    println("INFO: Output data is: $output_data")
+    println("INFO: Output format is: ${output_format}")
+
     Channel
-        .fromPath( "/home/kadomu/git/nf-benchmark/assets/methods2benchmark.csv" )
+        .fromPath( "$baseDir/assets/methods2benchmark.csv" )
         .splitCsv(header: true)
         .filter { row ->
-                  row.edam_operation == operation  &&
-                  row.edam_input_data == input_data &&
-                  row.edam_input_format == input_format &&
-                  row.edam_output_data == output_data &&
-                  row.edam_output_format == output_format
+            row.edam_operation == operation  &&
+            row.edam_input_data == input_data &&
+            row.edam_input_format == input_format &&
+            row.edam_output_data == output_data &&
+            row.edam_output_format == output_format
+        }
+        .map { it.benchmark }
+        .set { benchmark }
+
+     benchmark
+        .count()
+        .subscribe {
+            if ( it > 1 ) exit 1, "Error: More than one possible benchmark please refine pipeline description for \"${params.pipeline}\" pipeline"
+            if ( it == 0 ) exit 1, "Error: The selected pipeline  \"${params.pipeline}\" is not included in nf-benchmark"
         }
 
-    return "bali_base"
+    return benchmark
+
 }
 
-String benchmarker = setBenchmark(yamlPath)
+benchmark = setBenchmark(yamlPath)
 
+benchmark.view()
+
+benchmarker = "bali_base"
 include benchmark from "./modules/${benchmarker}/main.nf"
 
 println("INFO: Benchmark set to: ${benchmarker}")

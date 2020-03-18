@@ -70,42 +70,56 @@ def setBenchmark (configYmlFile) {
     def yaml = new Yaml()
     def pipelineConfig = yaml.load(file.text)
 
-    println("INFO: Selected pipeline name is: ${pipelineConfig.name}")
-    println("INFO: Selected edam topic is: ${pipelineConfig.pipeline.tcoffee.edam_topic[0]}")
-    println("INFO: Selected edam operation is: ${pipelineConfig.pipeline.tcoffee.edam_operation[0]}")
-    println("INFO: Input format is: ${pipelineConfig.input.fasta.edam_format[0]}")
-
     topic = pipelineConfig.pipeline.tcoffee.edam_topic[0]
     operation = pipelineConfig.pipeline.tcoffee.edam_operation[0]
 
+    input_data = pipelineConfig.input.fasta.edam_data[0][0]
     input_format = pipelineConfig.input.fasta.edam_format[0][0]
+    output_data = pipelineConfig.output.alignment.edam_data[0][0]
     output_format = pipelineConfig.output.alignment.edam_format[0][0]
 
-    // println(input_format)
-    // println(output_format)
+    println("INFO: Selected pipeline name is: ${pipelineConfig.name}")
+    println("INFO: Selected edam topic is: $topic")
+    println("INFO: Selected edam operation is: $operation")
 
-    Channel
-        .fromPath( "/home/kadomu/git/nf-benchmark/assets/methods2benchmark.csv" )
-        .splitCsv(header: true)
-        // .filter { row -> row.edam_input_format == "format_1929" && row.edam_output_format == "format_1984" }
-        .filter { row ->
-                  row.edam_operation == operation  &&
-                  row.edam_input_data == input_data &&
-                  row.edam_input_format == input_format &&
-                  row.edam_output_data == output_data &&
-                  row.edam_output_format == output_format
-        }
-        .view()
-//        .subscribe { row ->
-//       println "-${row}"
-//    }
-    println("-----------------")
-    return "bali_base"
+    println("INFO: Input data is: $input_data")
+    println("INFO: Input format is: ${input_format}")
+    println("INFO: Output data is: $output_data")
+    println("INFO: Output format is: ${output_format}")
+
+    // Read csv file also using groovy libraries
+    bc = Channel.fromPath( "$baseDir/assets/methods2benchmark.csv" )
+           .splitCsv(header: true)
+           .filter { row ->
+            row.edam_operation == operation  &&
+            row.edam_input_data == input_data &&
+            row.edam_input_format == input_format &&
+            row.edam_output_data == output_data &&
+            row.edam_output_format == output_format
+           }
+           .map {
+            it.benchmark
+           }
+
+    (benchmark, benchmark_check) = bc.into(2)
+
+     benchmark_check.count().subscribe {
+                    if ( it > 1 ) exit 1, "Error: More than one possible benchmark please refine pipeline description for \"${params.pipeline}\" pipeline"
+                    if ( it == 0 ) exit 1, "Error: The selected pipeline  \"${params.pipeline}\" is not included in nf-benchmark"
+                 }
+
+    return benchmark
 }
 
-String benchmarker = setBenchmark(yamlPath)
+//maybe I can use directly the channel!!! thing about it
+benchmark = setBenchmark(yamlPath)
 
-//benchmarker = "bali_base"
+benchmark.view()
+return
+
+// String benchmarker = setBenchmark(yamlPath)
+
+//benchmarker = "bali_base"d
 include benchmark from "./modules/${benchmarker}/main.nf"
 
 println("Benchmark set to: ${benchmarker}")

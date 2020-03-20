@@ -60,18 +60,115 @@ if( !pipeline_module.exists() ) exit 1, "ERROR: The selected pipeline is not inc
 include pipeline from  "${baseDir}/modules/${params.pipeline}/main.nf"
 
 yamlPath = "${baseDir}/modules/${params.pipeline}/meta.yml"
-csvPath = "${baseDir}/assets/methods2benchmark.csv"
+csvPathMethods = "${baseDir}/assets/methods2benchmark.csv"
+csvPathReference = "${baseDir}/assets/referenceData.csv"
+csvPathTest = "${baseDir}/assets/testDataInput.csv"
+csvPathBenchmarker = "${baseDir}/assets/dataFormat2benchmark.csv"
 
 // benchmark = setBenchmarkChannel(yamlPath, csvPath)
 // benchmark.view()
 
-benchmarker = setBenchmark(yamlPath, csvPath)
-println (benchmarker)
+infoBenchmark = setBenchmark(yamlPath, csvPathMethods)
+// println (infoBenchmark.benchmark)
+println (infoBenchmark)
+
+setReference (infoBenchmark, csvPathBenchmarker, csvPathTest, csvPathReference)
+
+// Think about which terms should I include:
+//  operation ??
+//  data  X
+//  format X
+//  tool ??
+//  benchmark ??
+def readCsv (pathCsv) {
+    def fileCsv = new File(pathCsv)
+    def data = parseCsv(fileCsv.text, autoDetect:true)
+
+    return data
+}
+
+def setReference (benchmarkInfo, benchmarkerCsv, testDataCsv, refDataCsv) {
+
+    def dataFormat2benchmark = readCsv(benchmarkerCsv)
+    def testData = readCsv(testDataCsv)
+    def refData = readCsv(refDataCsv)
+
+    def i = 0
+    def refDataDict = [:]
+
+    for( row in dataFormat2benchmark ) {
+        if ( row.edam_test_format == benchmarkInfo.input_format  &&
+             row.edam_ref_format  == benchmarkInfo.output_format &&
+             row.benchmarker      == benchmarkInfo.benchmarker ) {
+                i += 1
+
+                refDataDict = [ (i) : [ benchmarker: row.benchmarker,
+                                        test_format: row.edam_test_format,
+                                        ref_format : row.edam_ref_format ] ]
+        }
+    }
+
+    if ( refDataDict.size() > 1 ) exit 1, "Error: More than one possible benchmarker please refine pipeline description for \"${params.pipeline}\" pipeline"
+    if ( refDataDict.size() == 0 ) exit 1, "Error: The selected pipeline  \"${params.pipeline}\" is not included in nf-benchmark"
+
+    println("##################")
+
+    println (refDataDict [1])
+    def test_format = ""
+    def ref_format = ""
+    refDataHit = refDataDict[ 1 ]
+
+    for( row in refData) {
+        if ( row.benchmarker == refDataHit.benchmarker  &&
+             row.edam_test_format == refDataHit.test_format &&
+             row.edam_ref_format == refDataHit.ref_format) {
+                println ("@@@ id ${row.id}")
+                println ("### test ${row.edam_test_format}")
+                println ("### ref ${row.edam_ref_format}")
+        }
+    }
+}
+// set input for the pipeline
+// set the reference for the benchmarker
+
+
+def setReferenceLong (benchmarkInfo, benchmarkerCsv, testDataCsv, refDataCsv) {
+
+    def fileCsvBen = new File(benchmarkerCsv)
+    def benchmarkData = parseCsv(fileCsv.text, autoDetect:true)
+
+    def fileCsvTest = new File(testDataCsv)
+    def csvTestData = parseCsv(fileCsvTest.text, autoDetect:true)
+
+    def fileCsvRef = new File(refDataCsv)
+    def csvRefData = parseCsv(fileCsvRef.text, autoDetect:true)
+
+    def i = 0
+    def refDataDict = [:]
+
+    for( row in csvRefData ) {
+        if ( row.edam_data == benchmarkInfo.input_data  &&
+             row.edam_format == benchmarkInfo.input_format ) {
+                i += 1
+
+                refDataDict = [ (i) : [ ref_input_data: row.edam_data,
+                                        ref_input_format: row.edam_format,
+                                        ref_input_p: row.ref_data_p ] ]
+        }
+    }
+
+    println ("..............................................")
+    println (refDataDict)
+    println ("..............................................")
+}
 
 // benchmarker = "bali_base"
-include benchmark from "./modules/${benchmarker}/main.nf"
+include benchmark from "./modules/${infoBenchmark.benchmarker}/main.nf"
 
-println("INFO: Benchmark set to: ${benchmarker}")
+println("INFO: Benchmark set to: ${infoBenchmark.benchmarker}")
+
+// relationship 1 to 1 between the input and the output
+// could be that some inputs can also be output to other pipelines
 
 // alignment BBA0001
 params.sequences = "${baseDir}/test/sequences/input/BBA0001.tfa"
@@ -126,24 +223,41 @@ def setBenchmark (configYmlFile, benchmarkInfo) {
 
     def fileCsv = new File(benchmarkInfo)
     def csvData = parseCsv(fileCsv.text, autoDetect:true)
-    def benchmarkList = []
+    // def benchmarkList = []
+    def benchmarkDict = [:]
+    def i = 0
 
     for( row in csvData ) {
         if ( row.edam_operation == operation  &&
-            row.edam_input_data == input_data &&
-            row.edam_input_format == input_format &&
-            row.edam_output_data == output_data &&
-            row.edam_output_format == output_format ) {
-
-                benchmarkList.add(row.benchmark)
+             row.edam_input_data == input_data &&
+             row.edam_input_format == input_format &&
+             row.edam_output_data == output_data &&
+             row.edam_output_format == output_format ) {
+                i += 1
+                // benchmarkList.add(row.benchmarker)
+                benchmarkDict = [ (i) : [ benchmarker: row.benchmarker,
+                                          operation: row.edam_operation,
+                                          input_data: row.edam_input_data,
+                                          input_format: row.edam_input_format,
+                                          output_data: row.edam_output_data,
+                                          output_format: row.edam_output_format ] ]
                 // println "$row.edam_operation -----************---------"
         }
     }
 
-    if ( benchmarkList.size() > 1 ) exit 1, "Error: More than one possible benchmark please refine pipeline description for \"${params.pipeline}\" pipeline"
-    if ( benchmarkList.size() == 0 ) exit 1, "Error: The selected pipeline  \"${params.pipeline}\" is not included in nf-benchmark"
+    //if ( benchmarkList.size() > 1 ) exit 1, "Error: More than one possible benchmark please refine pipeline description for \"${params.pipeline}\" pipeline"
+    //if ( benchmarkList.size() == 0 ) exit 1, "Error: The selected pipeline  \"${params.pipeline}\" is not included in nf-benchmark"
 
-    return benchmarkList[0]
+    if ( benchmarkDict.size() > 1 ) exit 1, "Error: More than one possible benchmark please refine pipeline description for \"${params.pipeline}\" pipeline"
+    if ( benchmarkDict.size() == 0 ) exit 1, "Error: The selected pipeline  \"${params.pipeline}\" is not included in nf-benchmark"
+
+    //println ( "Size is........." + benchmarkDict.size()  )
+    //println ( "====================" )
+    //println ( benchmarkDict [ 1 ] )
+    //println ( benchmarkDict.keySet() )
+
+    // return benchmarkList[0]
+    return benchmarkDict[ 1 ]
 }
 
 // benchmarkInfo currently is a CSV but could become a DBs or something else

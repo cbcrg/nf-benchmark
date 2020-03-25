@@ -5,8 +5,8 @@ process benchmark {
     // container 'cbcrg/baliscore-v4.0@sha256:0c1f8534ebf9f99b65c3ef78b8e7dacb134f9c162ef987ce379463c28ab9c9df'
 
     input:
-        path (target_aln)
-        path (ref_aln)
+    tuple val (id), path (target_aln), path (ref_aln)
+
     output:
     path "score.out", emit: score
 

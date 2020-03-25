@@ -4,10 +4,10 @@ process pipeline {
     container 'quay.io/biocontainers/t_coffee:11.0.8--py27pl5.22.0_5'
 
     input:
-    path(fasta)
+    tuple val (id), file (fasta), file (reference)
 
     output:
-    path "${fasta}.aln.fasta", emit: alignment
+    tuple val (id), path ("${fasta}.aln.fasta"), path (reference)
 
     script:
     """

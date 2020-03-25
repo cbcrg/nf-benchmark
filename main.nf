@@ -69,10 +69,9 @@ csvPathBenchmarker = "${baseDir}/assets/dataFormat2benchmark.csv"
 // benchmark.view()
 
 infoBenchmark = setBenchmark(yamlPath, csvPathMethods)
-// println (infoBenchmark.benchmark)
-println (infoBenchmark)
+// println (infoBenchmark) // [benchmarker:bali_score, operation:operation_0492, input_data:data_1233, input_format:format_1929, output_data:data_1384, output_format:format_1984]
 
-setReference (infoBenchmark, csvPathBenchmarker, csvPathTest, csvPathReference)
+ref_data = setReference (infoBenchmark, csvPathBenchmarker, csvPathTest, csvPathReference)
 
 // Think about which terms should I include:
 //  operation ??
@@ -80,12 +79,6 @@ setReference (infoBenchmark, csvPathBenchmarker, csvPathTest, csvPathReference)
 //  format X
 //  tool ??
 //  benchmark ??
-def readCsv (pathCsv) {
-    def fileCsv = new File(pathCsv)
-    def data = parseCsv(fileCsv.text, autoDetect:true)
-
-    return data
-}
 
 def setReference (benchmarkInfo, benchmarkerCsv, testDataCsv, refDataCsv) {
 
@@ -111,14 +104,14 @@ def setReference (benchmarkInfo, benchmarkerCsv, testDataCsv, refDataCsv) {
     if ( refDataDict.size() > 1 ) exit 1, "Error: More than one possible benchmarker please refine pipeline description for \"${params.pipeline}\" pipeline"
     if ( refDataDict.size() == 0 ) exit 1, "Error: The selected pipeline  \"${params.pipeline}\" is not included in nf-benchmark"
 
-    println("##################")
-
     println (refDataDict [1])
     def test_format = ""
     def ref_format = ""
     refDataHit = refDataDict[ 1 ]
+    println("@@@@@@@@benchmarker ${refDataHit.benchmarker}")
 
     for( row in refData) {
+
         if ( row.benchmarker == refDataHit.benchmarker  &&
              row.edam_test_format == refDataHit.test_format &&
              row.edam_ref_format == refDataHit.ref_format) {
@@ -127,10 +120,27 @@ def setReference (benchmarkInfo, benchmarkerCsv, testDataCsv, refDataCsv) {
                 println ("### ref ${row.edam_ref_format}")
         }
     }
+
+    //println("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@INFO: Selected pipeline name is \"${refDataCsv}\"") //del
+
+    Channel
+        .fromPath( refDataCsv )
+        .splitCsv(header: true)
+        .filter { row ->
+            row.benchmarker == refDataHit.benchmarker
+        }
+        .map { [ it.id, //it.edam_test_data,
+                 // it.edam_ref_data,
+                 file("${baseDir}/reference_dataset/" + it.id + it.test_data_format),
+                 file("${baseDir}/reference_dataset/" + it.id + it.ref_data_format) ]
+        }
+        .set { reference_data }
+
+    return reference_data
 }
+
 // set input for the pipeline
 // set the reference for the benchmarker
-
 
 def setReferenceLong (benchmarkInfo, benchmarkerCsv, testDataCsv, refDataCsv) {
 
@@ -171,8 +181,11 @@ println("INFO: Benchmark set to: ${infoBenchmark.benchmarker}")
 // could be that some inputs can also be output to other pipelines
 
 // alignment BBA0001
-params.sequences = "${baseDir}/test/sequences/input/BBA0001.tfa"
-params.reference = "${baseDir}/test/sequences/reference/BBA0001.xml"
+// params.sequences = "${baseDir}/test/sequences/input/BBA0001.tfa"
+// params.reference = "${baseDir}/test/sequences/reference/BBA0001.xml"
+// params.sequences = "${baseDir}/reference_dataset/BBA0001.tfa"
+// params.reference = "${baseDir}/reference_dataset/BBA0001.xml"
+ref_data.view()
 
 // aligment BB11001
 // params.sequences = "${baseDir}/test/sequences/input/BB11001.fa"
@@ -186,11 +199,18 @@ params.reference = "${baseDir}/test/sequences/reference/BBA0001.xml"
 
 // Run the workflow
 workflow {
-    pipeline(params.sequences)
-    benchmark(pipeline.out, params.reference)
+    pipeline(ref_data)
+    benchmark(pipeline.out)
     // bali_base(pipeline.out, params.reference)
     // nf-benchmark()
     // .check_output()
+}
+
+def readCsv (pathCsv) {
+    def fileCsv = new File(pathCsv)
+    def data = parseCsv(fileCsv.text, autoDetect:true)
+
+    return data
 }
 
 // benchmarkInfo currently is a CSV but could become a DBs or something else
@@ -257,7 +277,7 @@ def setBenchmark (configYmlFile, benchmarkInfo) {
     //println ( benchmarkDict.keySet() )
 
     // return benchmarkList[0]
-    return benchmarkDict[ 1 ]
+    return benchmarkDict [ 1 ]
 }
 
 // benchmarkInfo currently is a CSV but could become a DBs or something else

@@ -58,7 +58,7 @@ infoBenchmark = setBenchmark(yamlPath, csvPathMethods)
 
 ref_data = setReference (infoBenchmark, csvPathBenchmarker, csvPathReference)
 
-include benchmark from "./modules/${infoBenchmark.benchmarker}/main.nf"
+include benchmark from "${baseDir}/modules/${infoBenchmark.benchmarker}/main.nf"
 
 println("INFO: Benchmark set to: ${infoBenchmark.benchmarker}")
 
@@ -70,10 +70,15 @@ println("INFO: Benchmark set to: ${infoBenchmark.benchmarker}")
 // params.reference = "${baseDir}/test/sequences/reference/BB11001.xml.ref"
 // benchmarker = "bali_base"
 
+include mean_benchmark_score from "${baseDir}/modules/mean_benchmark_score/main.nf"
+
 // Run the workflow
 workflow {
     pipeline(ref_data)
     benchmark(pipeline.out)
+    //benchmark.out.score.view()
+    benchmark.out.score | map { it.text } | collectFile (name: 'scores.csv', newLine: false) | set { scores }
+    mean_benchmark_score(scores) | view
 }
 
 /*

@@ -1,3 +1,6 @@
 id,edam_operation,edam_test_data,edam_test_format,edam_ref_data,edam_ref_format,benchmarker,dataset,version,test_data_format,ref_data_format
 BBA0001,operation_0492,data_1233,format_1929,data_1384,format_1984,bali_score,balibase_vX,vX,.tfa,.xml
 BBA0002,operation_0492,data_1233,format_1929,data_1384,format_1984,bali_score,balibase_vX,vX,.tfa,.xml
+BBA0003,operation_0492,data_1233,format_1929,data_1384,format_1984,bali_score,balibase_vX,vX,.tfa,.xml
+BBA0004,operation_0492,data_1233,format_1929,data_1384,format_1984,bali_score,balibase_vX,vX,.tfa,.xml
+BBA0005,operation_0492,data_1233,format_1929,data_1384,format_1984,bali_score,balibase_vX,vX,.tfa,.xml

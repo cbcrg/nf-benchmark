@@ -21,7 +21,7 @@
  */
 
  /*
- * Proof of concept of a RNAseq pipeline implemented with Nextflow
+ * Proof of concept of benchmark-nf: An automatic benchmarking pipeline implemented with Nextflow
  *
  * Authors:
  * - Jose Espinosa-Carrasco <espinosacarrascoj@gmail.com>
@@ -32,26 +32,94 @@ nextflow.preview.dsl = 2
 @Grab(group='org.yaml', module='snakeyaml', version='1.5')
 import org.yaml.snakeyaml.Yaml
 
-def yaml = new Yaml()
+@Grab('com.xlson.groovycsv:groovycsv:1.0')
+// @Grab('com.xlson.groovycsv:groovycsv:1.3')// slower download
+import static com.xlson.groovycsv.CsvParser.parseCsv
 
-pipeline_module = file( "./modules/${params.pipeline}/main.nf")
+ log.info """\
+ N F - B E N C H M A R K
+ ===================================
+pipeline: ${params.pipeline}
+ """
 
+// Include the pipeline of modules if available
+pipeline_module = file( "${baseDir}/modules/${params.pipeline}/main.nf")
 if( !pipeline_module.exists() ) exit 1, "ERROR: The selected pipeline is not included in nf-benchmark: ${params.pipeline}"
+include pipeline from  "${baseDir}/modules/${params.pipeline}/main.nf"
 
-include pipeline from  "./modules/${params.pipeline}/main.nf"
+// Pipeline meta-information from the pipeline
+yamlPath = "${baseDir}/modules/${params.pipeline}/meta.yml"
+csvPathMethods = "${baseDir}/assets/methods2benchmark.csv"
+csvPathBenchmarker = "${baseDir}/assets/dataFormat2benchmark.csv"
+csvPathReference = "${baseDir}/assets/referenceData.csv"
 
-yamlPath = "./modules/${params.pipeline}/meta.yml"
-def file = new File(yamlPath)
-def pipelineConfig = yaml.load(file.text)
+infoBenchmark = setBenchmark(yamlPath, csvPathMethods)
+// println (infoBenchmark) // [benchmarker:bali_score, operation:operation_0492, input_data:data_1233, input_format:format_1929, output_data:data_1384, output_format:format_1984]
 
-println("INFO: Selected pipeline name is \"${pipelineConfig.name}\"")
+ref_data = setReference (infoBenchmark, csvPathBenchmarker, csvPathReference)
+infoBenchmark.println()
+include benchmark from "${baseDir}/modules/${infoBenchmark.benchmarker}/main.nf"
 
-def setBenchmark (configYmlFile) {
-    println("INFO: Path to yaml pipeline configuration file \"${configYmlFile}\"")
+println("INFO: Benchmark set to: ${infoBenchmark.benchmarker}")
 
-    def file = new File(configYmlFile)
+// ref_data.view()
+
+// Hardcodes testing #del
+// aligment BB11001
+// params.sequences = "${baseDir}/test/sequences/input/BB11001.fa"
+// params.reference = "${baseDir}/test/sequences/reference/BB11001.xml.ref"
+// benchmarker = "bali_base"
+
+include mean_benchmark_score from "${baseDir}/modules/mean_benchmark_score/main.nf"
+
+// Run the workflow
+workflow {
+    pipeline(ref_data)
+    benchmark(pipeline.out)
+    benchmark.out.score | map { it.text } | collectFile (name: 'scores.csv', newLine: false) | set { scores }
+    mean_benchmark_score(scores) | view
+}
+
+/*
+ ************
+ * Functions
+ ************
+ */
+
+/*
+ * Function reads a csv file and returns the data inside the file ready to be used
+ */
+def readCsv (pathCsv) {
+    def fileCsv = new File(pathCsv)
+    def data = parseCsv(fileCsv.text, autoDetect:true)
+
+    return data
+}
+
+/*
+ * Takes the info from the pipeline yml file with the pipeline metadata and sets the corresponding benchmark
+ * The information that reads from the pipeline are:
+ *  - edam_operation
+ *  - edam_input_data
+ *  - edam_input_format
+ *  - edam_output_format
+ *  - edam_output_data
+ *  - edam_output_format
+ * With this information the benchmarker is set and it is returned in a dictionary along with the above-mentioned
+ * metadata
+ */
+
+// MAYBE ALIGNMENT SHOULD BE MODIFIED BY SOMETHING MORE GENERAL
+// benchmarkInfo currently is a CSV but could become a DBs or something else
+def setBenchmark (configYmlFile, benchmarkInfo) {
+
+    def fileYml = new File(configYmlFile)
     def yaml = new Yaml()
-    def pipelineConfig = yaml.load(file.text)
+    def pipelineConfig = yaml.load(fileYml.text)
+
+    // println("INFO: Selected pipeline name is \"${pipelineConfig.name}\"")
+    // println("INFO: Path to yaml pipeline configuration file \"${configYmlFile}\"")
+    // println("INFO: Path to CSV benchmark info file \"${benchmarkInfo}\"")
 
     topic = pipelineConfig.pipeline.tcoffee.edam_topic[0]
     operation = pipelineConfig.pipeline.tcoffee.edam_operation[0]
@@ -61,65 +129,81 @@ def setBenchmark (configYmlFile) {
     output_data = pipelineConfig.output.alignment.edam_data[0][0]
     output_format = pipelineConfig.output.alignment.edam_format[0][0]
 
-    println("INFO: Selected pipeline name is: ${pipelineConfig.name}")
-    println("INFO: Selected edam topic is: $topic")
-    println("INFO: Selected edam operation is: $operation")
+    // println("INFO: Selected pipeline name is: ${pipelineConfig.name}")
+    // println("INFO: Selected edam topic is: $topic")
+    // println("INFO: Selected edam operation is: $operation")
 
-    println("INFO: Input data is: $input_data")
-    println("INFO: Input format is: ${input_format}")
-    println("INFO: Output data is: $output_data")
-    println("INFO: Output format is: ${output_format}")
+    // println("INFO: Input data is: $input_data")
+    // println("INFO: Input format is: ${input_format}")
+    // println("INFO: Output data is: $output_data")
+    // println("INFO: Output format is: ${output_format}")
 
-    Channel
-        .fromPath( "$baseDir/assets/methods2benchmark.csv" )
-        .splitCsv(header: true)
-        .filter { row ->
-            row.edam_operation == operation  &&
-            row.edam_input_data == input_data &&
-            row.edam_input_format == input_format &&
-            row.edam_output_data == output_data &&
-            row.edam_output_format == output_format
+    def csvBenchmark = readCsv (benchmarkInfo)
+    def benchmarkDict = [:]
+    def i = 0
+
+    for( row in csvBenchmark ) {
+        if ( row.edam_operation == operation  &&
+             row.edam_input_data == input_data &&
+             row.edam_input_format == input_format &&
+             row.edam_output_data == output_data &&
+             row.edam_output_format == output_format ) {
+                i += 1
+
+                benchmarkDict = [ (i) : [ benchmarker: row.benchmarker,
+                                          operation: row.edam_operation,
+                                          input_data: row.edam_input_data,
+                                          input_format: row.edam_input_format,
+                                          output_data: row.edam_output_data,
+                                          output_format: row.edam_output_format ] ]
         }
-        .map { it.benchmark }
-        .set { benchmark }
+    }
 
-     benchmark
-        .count()
-        .subscribe {
-            if ( it > 1 ) exit 1, "Error: More than one possible benchmark please refine pipeline description for \"${params.pipeline}\" pipeline"
-            if ( it == 0 ) exit 1, "Error: The selected pipeline  \"${params.pipeline}\" is not included in nf-benchmark"
-        }
+    if ( benchmarkDict.size() > 1 ) exit 1, "Error: More than one possible benchmark please refine pipeline description for \"${params.pipeline}\" pipeline"
+    if ( benchmarkDict.size() == 0 ) exit 1, "Error: The selected pipeline  \"${params.pipeline}\" is not included in nf-benchmark"
 
-    return benchmark
-
+    return benchmarkDict [ 1 ]
 }
 
-benchmark = setBenchmark(yamlPath)
+/*
+ * Functions returns the test and reference data to be used given the benchmarker
+ */
+def setReference (benchmarkInfo, benchmarkerCsv, refDataCsv) {
 
-benchmark.view()
+    def dataFormat2benchmark = readCsv(benchmarkerCsv)
+    def refData = readCsv(refDataCsv)
 
-benchmarker = "bali_base"
-include benchmark from "./modules/${benchmarker}/main.nf"
+    def i = 0
+    def refDataDict = [:]
 
-println("INFO: Benchmark set to: ${benchmarker}")
+    for( row in dataFormat2benchmark ) {
+        if ( row.edam_test_format == benchmarkInfo.input_format  &&
+             row.edam_ref_format  == benchmarkInfo.output_format &&
+             row.benchmarker      == benchmarkInfo.benchmarker ) {
+                i += 1
 
-// Define input channels
-// alignment BBA0001
-params.sequences = "$baseDir/test/sequences/input/BBA0001.tfa"
-params.reference = "$baseDir/test/sequences/reference/BBA0001.xml"
+                refDataDict = [ (i) : [ benchmarker: row.benchmarker,
+                                        test_format: row.edam_test_format,
+                                        ref_format : row.edam_ref_format ] ]
+        }
+    }
 
-// aligment BB11001
-// params.sequences = "$baseDir/test/sequences/input/BB11001.fa"
-// params.reference = "$baseDir/test/sequences/reference/BB11001.xml.ref"
+    if ( refDataDict.size() > 1 ) exit 1, "Error: More than one possible benchmarker please refine pipeline description for \"${params.pipeline}\" pipeline"
+    if ( refDataDict.size() == 0 ) exit 1, "Error: The selected pipeline  \"${params.pipeline}\" is not included in nf-benchmark"
 
- log.info """\
- N F - B E N C H M A R K
- ===================================
- sequences: ${params.sequences}
- """
+    refDataHit = refDataDict[ 1 ]
 
-// Run the workflow
-workflow {
-    pipeline(params.sequences)
-    benchmark(pipeline.out, params.reference)
+    Channel
+        .fromPath( refDataCsv )
+        .splitCsv(header: true)
+        .filter { row ->
+            row.benchmarker == refDataHit.benchmarker
+        }
+        .map { [ it.id, //it.edam_test_data,
+                 file("${baseDir}/reference_dataset/" + it.id + it.test_data_format),
+                 file("${baseDir}/reference_dataset/" + it.id + it.ref_data_format) ]
+        }
+        .set { reference_data }
+
+    return reference_data
 }

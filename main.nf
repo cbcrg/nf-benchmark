@@ -57,7 +57,7 @@ infoBenchmark = setBenchmark(yamlPath, csvPathMethods)
 // println (infoBenchmark) // [benchmarker:bali_score, operation:operation_0492, input_data:data_1233, input_format:format_1929, output_data:data_1384, output_format:format_1984]
 
 ref_data = setReference (infoBenchmark, csvPathBenchmarker, csvPathReference)
-
+infoBenchmark.println()
 include benchmark from "${baseDir}/modules/${infoBenchmark.benchmarker}/main.nf"
 
 println("INFO: Benchmark set to: ${infoBenchmark.benchmarker}")
@@ -76,7 +76,6 @@ include mean_benchmark_score from "${baseDir}/modules/mean_benchmark_score/main.
 workflow {
     pipeline(ref_data)
     benchmark(pipeline.out)
-    //benchmark.out.score.view()
     benchmark.out.score | map { it.text } | collectFile (name: 'scores.csv', newLine: false) | set { scores }
     mean_benchmark_score(scores) | view
 }
@@ -88,7 +87,7 @@ workflow {
  */
 
 /*
- * Function reads a csv file are returns the data inside ready to be use
+ * Function reads a csv file and returns the data inside the file ready to be used
  */
 def readCsv (pathCsv) {
     def fileCsv = new File(pathCsv)
@@ -99,7 +98,18 @@ def readCsv (pathCsv) {
 
 /*
  * Takes the info from the pipeline yml file with the pipeline metadata and sets the corresponding benchmark
+ * The information that reads from the pipeline are:
+ *  - edam_operation
+ *  - edam_input_data
+ *  - edam_input_format
+ *  - edam_output_format
+ *  - edam_output_data
+ *  - edam_output_format
+ * With this information the benchmarker is set and it is returned in a dictionary along with the above-mentioned
+ * metadata
  */
+
+// MAYBE ALIGNMENT SHOULD BE MODIFIED BY SOMETHING MORE GENERAL
 // benchmarkInfo currently is a CSV but could become a DBs or something else
 def setBenchmark (configYmlFile, benchmarkInfo) {
 
@@ -128,12 +138,11 @@ def setBenchmark (configYmlFile, benchmarkInfo) {
     // println("INFO: Output data is: $output_data")
     // println("INFO: Output format is: ${output_format}")
 
-    def fileCsv = new File(benchmarkInfo)
-    def csvData = parseCsv(fileCsv.text, autoDetect:true)
+    def csvBenchmark = readCsv (benchmarkInfo)
     def benchmarkDict = [:]
     def i = 0
 
-    for( row in csvData ) {
+    for( row in csvBenchmark ) {
         if ( row.edam_operation == operation  &&
              row.edam_input_data == input_data &&
              row.edam_input_format == input_format &&

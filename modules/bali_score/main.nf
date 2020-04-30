@@ -1,5 +1,5 @@
 process benchmark {
-    tag {balibase}
+    tag { id }
     publishDir "${params.outdir}/bali_base"
     container 'cbcrg/baliscore-v3.1@sha256:e72eb7b2f375c3c1248cc31a96db36dc9c20c2891d297fe8c94f1124930932bb'
 

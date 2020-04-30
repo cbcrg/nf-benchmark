@@ -1,0 +1,34 @@
+name: tcoffee
+description: Run tcofee multiple sequence alignment
+keywords:
+    - MSA
+    - multiple sequence aligment
+    - sequence aligment
+pipeline:
+    - example_include_pipeline:
+        description: |
+            This a toy example to prototype how to include compound pipelines in nf-benchmark
+        homepage: https://github.com/cbcrg/nf-benchmark
+        documentation: https://github.com/cbcrg/nf-benchmark
+        edam_topic: topic_0091
+        edam_operation: operation_0492
+input:
+    -
+        - fasta:
+            type: path
+            edam_data: data_1233
+            edam_format: format_1929
+            format: fasta
+            description: Input fasta file with a set of alignments
+            pattern: '*.{fasta,fa,tfa}'
+output:
+    -
+        - alignment:
+            type: file
+            edam_data: data_1384
+            edam_format: format_1984
+            format: fasta_alignment
+            description: fasta alignment file
+            pattern: '*.{fasta,fa,tfa}'
+authors:
+    - '@JoseEspinosa'

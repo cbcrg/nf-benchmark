@@ -64,14 +64,17 @@ infoBenchmark = setBenchmark(yamlPath, csvPathMethods)
 // println (infoBenchmark) // [benchmarker:bali_score, operation:operation_0492, input_data:data_1233, input_format:format_1929, output_data:data_1384, output_format:format_1984]
 
 ref_data = setReference (infoBenchmark, csvPathBenchmarker, csvPathReference)
+// ref_data.view()
 infoBenchmark.println()
-include benchmark from "${baseDir}/modules/${infoBenchmark.benchmarker}/main.nf"
+// println (".......................") //#del
+
 include pipeline from  "${baseDir}/modules/${params.pipeline}/main.nf" params(outdir: params.outdir, ref_data: ref_data)
+include benchmark from "${baseDir}/modules/${infoBenchmark.benchmarker}/main.nf"
 
 println("INFO: Benchmark set to: ${infoBenchmark.benchmarker}")
 
 // ref_data.view()
-// return
+
 //println( "==================" + ref_data[0])
 //println( "==================" + ref_data[1] )
 
@@ -103,7 +106,9 @@ workflow {
 
     pipeline()
     benchmark (pipeline.out)
-    benchmark.out.score \
+    //benchmark (pipeline.out)
+    //benchmark.out.score \
+    benchmark.out \
         | map { it.text } \
         | collectFile (name: 'scores.csv', newLine: false) \
         | set { scores }
@@ -189,10 +194,10 @@ def setBenchmark (configYmlFile, benchmarkInfo) {
                                           input_format: row.edam_input_format,
                                           output_data: row.edam_output_data,
                                           output_format: row.edam_output_format ]
-                println (benchmarkDict)
+                // println (benchmarkDict) //#del
         }
     }
-    println (benchmarkDict[1])
+    // println (benchmarkDict[1]) //#del
     if ( benchmarkDict.size() > 1 ) exit 1, "Error: More than one possible benchmark please refine pipeline description for \"${params.pipeline}\" pipeline"
     if ( benchmarkDict.size() == 0 ) exit 1, "Error: The selected pipeline  \"${params.pipeline}\" is not included in nf-benchmark"
 
@@ -234,7 +239,7 @@ def setReference (benchmarkInfo, benchmarkerCsv, refDataCsv) {
 
     for( row in refData ) {
         if ( row.benchmarker == refDataHit.benchmarker) {
-            println ( row.id + "===" + row.id + row.test_data_format + "===" + row.id +  row.ref_data_format )
+            // println ( row.id + "===" + row.id + row.test_data_format + "===" + row.id +  row.ref_data_format ) //#del
             id = row.id
             test_data_file = row.id + row.test_data_format
             ref_data_file = row.id + row.ref_data_format
@@ -251,8 +256,16 @@ def setReference (benchmarkInfo, benchmarkerCsv, refDataCsv) {
         .map { [ it.id, //it.edam_test_data,
                  file("${baseDir}/reference_dataset/" + it.id + it.test_data_format),
                  file("${baseDir}/reference_dataset/" + it.id + it.ref_data_format) ]
+
         }
         .set { reference_data }
+
+        hits = reference_data.ifEmpty ( false )
+
+        hits.map {
+            if ( !it ) { exit 1, "Error: No reference data found for benchmarker" }
+        }
+
 
     // return [ id, test_data_file, ref_data_file ]
     // return refList

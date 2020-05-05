@@ -1,3 +1,10 @@
+/*
+ * Reformats an alignment using mview
+ */
+
+params.format_in = "fasta"
+params.format_out = "msf"
+
 process reformat {
     tag { id }
     publishDir "${params.outdir}/bali_base"
@@ -7,10 +14,10 @@ process reformat {
     tuple val (id), path (target_aln), path (ref_aln)
 
     output:
-    tuple val (id), path ("${target_aln}.msf"), path (ref_aln)
+    tuple val (id), path ("${target_aln}.${params.format_out}"), path (ref_aln)
 
     script:
     """
-    mview -in fasta -out msf $target_aln > ${target_aln}.msf
+    mview -in ${params.format_in} -out msf $target_aln > ${target_aln}.${params.format_out}
     """
 }

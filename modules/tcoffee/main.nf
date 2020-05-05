@@ -1,19 +1,22 @@
-process pipeline {
-    tag {fasta}
-    publishDir "${params.outdir}/tcoffee"
-    container 'quay.io/biocontainers/t_coffee:11.0.8--py27pl5.22.0_5'
+/*
+ * Workflow to run tcoffee
+ * Pipelines could be complex with several steps, thus I need to declare here all the modules and the logic of the
+ * pipeline but not the benchmark steps
+ */
 
-    input:
-    tuple val (id), file (fasta), file (reference)
+params.outdir = ''
+params.ref_data = ''
 
-    output:
-    tuple val (id), path ("${fasta}.aln.fasta"), path (reference)
+include align from "${baseDir}/modules/test_tcoffee/align.nf"
+include reformat from "${baseDir}/modules/test_tcoffee/reformat.nf"
 
-    script:
-    """
-    t_coffee -multi_core=$task.cpus -in=$fasta -output msf -run_name aln
-    t_coffee -other_pg seq_reformat aln.msf -output fasta > ${fasta}.aln.fasta
-    """
+// Run the workflow
+workflow pipeline {
+    main:
+    // Channel.from(params.ref_data) \
+    align (params.ref_data) \
+      | reformat
+
+    emit:
+      reformat.out
 }
-
-// t_coffee -in $fasta -outfile ${fasta}.aln.fasta -output fasta

@@ -36,23 +36,19 @@ import org.yaml.snakeyaml.Yaml
 // @Grab('com.xlson.groovycsv:groovycsv:1.3')// slower download
 import static com.xlson.groovycsv.CsvParser.parseCsv
 
- log.info """\
+log.info """\
+===================================
  N F - B E N C H M A R K
- ===================================
-pipeline: ${params.pipeline}
- """
+===================================
+Pipeline: ${params.pipeline}
+"""
 
 params.outdir = "${baseDir}/results"
-params.foo = 'out'
-// println ("////////////           ${params.outdir}")
-// params.ref_data = [ 'id', 'ref_test_data', 'ref.result.data' ]
-params.ref_data = ""
-
+params.ref_data = ''
 
 // Include the pipeline of modules if available
 pipeline_module = file( "${baseDir}/modules/${params.pipeline}/main.nf")
 if( !pipeline_module.exists() ) exit 1, "ERROR: The selected pipeline is not included in nf-benchmark: ${params.pipeline}"
-
 
 // Pipeline meta-information from the pipeline
 yamlPath = "${baseDir}/modules/${params.pipeline}/meta.yml"
@@ -64,24 +60,12 @@ infoBenchmark = setBenchmark(yamlPath, csvPathMethods)
 // println (infoBenchmark) // [benchmarker:bali_score, operation:operation_0492, input_data:data_1233, input_format:format_1929, output_data:data_1384, output_format:format_1984]
 
 ref_data = setReference (infoBenchmark, csvPathBenchmarker, csvPathReference)
-// ref_data.view()
-infoBenchmark.println()
-// println (".......................") //#del
 
 include pipeline from  "${baseDir}/modules/${params.pipeline}/main.nf" params(outdir: params.outdir, ref_data: ref_data)
 include benchmark from "${baseDir}/modules/${infoBenchmark.benchmarker}/main.nf"
+include mean_benchmark_score from "${baseDir}/modules/mean_benchmark_score/main.nf"
 
-println("INFO: Benchmark set to: ${infoBenchmark.benchmarker}")
-
-// ref_data.view()
-
-//println( "==================" + ref_data[0])
-//println( "==================" + ref_data[1] )
-
-// devolver los inputs en una lista
-// dentro de la pipeline se lee el input como una channel a partir del parametro
-// y se corre la pipeline tantas veces como haga falta
-
+println("Benchmark: ${infoBenchmark.benchmarker}")
 
 // Hardcodes testing #del
 // aligment BB11001
@@ -89,32 +73,17 @@ println("INFO: Benchmark set to: ${infoBenchmark.benchmarker}")
 // params.reference = "${baseDir}/test/sequences/reference/BB11001.xml.ref"
 // benchmarker = "bali_base"
 
-include mean_benchmark_score from "${baseDir}/modules/mean_benchmark_score/main.nf"
-
 // Run the workflow
-
-/*
-workflow {
-    pipeline(ref_data)
-    benchmark(pipeline.out)
-    benchmark.out.score | map { it.text } | collectFile (name: 'scores.csv', newLine: false) | set { scores }
-    mean_benchmark_score(scores) | view
-}
-*/
-
 workflow {
 
     pipeline()
     benchmark (pipeline.out)
-    //benchmark (pipeline.out)
-    //benchmark.out.score \
     benchmark.out \
         | map { it.text } \
         | collectFile (name: 'scores.csv', newLine: false) \
         | set { scores }
-
-    mean_benchmark_score(scores) | view
-
+    // TODO: output sometimes could be more than just a single score, refactor to be compatible with these cases
+    mean_benchmark_score(scores) // | view
 }
 
 /*
@@ -154,10 +123,6 @@ def setBenchmark (configYmlFile, benchmarkInfo) {
     def yaml = new Yaml()
     def pipelineConfig = yaml.load(fileYml.text)
 
-    // println("INFO: Selected pipeline name is \"${pipelineConfig.name}\"")
-    // println("INFO: Path to yaml pipeline configuration file \"${configYmlFile}\"")
-    // println("INFO: Path to CSV benchmark info file \"${benchmarkInfo}\"")
-
     topic = pipelineConfig.pipeline.tcoffee.edam_topic[0]
     operation = pipelineConfig.pipeline.tcoffee.edam_operation[0]
 
@@ -167,6 +132,9 @@ def setBenchmark (configYmlFile, benchmarkInfo) {
     output_format = pipelineConfig.output.alignment.edam_format[0][0]
 
     // println("INFO: Selected pipeline name is: ${pipelineConfig.name}")
+    // println("INFO: Path to yaml pipeline configuration file \"${configYmlFile}\"")
+    // println("INFO: Path to CSV benchmark info file \"${benchmarkInfo}\"")
+
     // println("INFO: Selected edam topic is: $topic")
     // println("INFO: Selected edam operation is: $operation")
 
@@ -185,16 +153,13 @@ def setBenchmark (configYmlFile, benchmarkInfo) {
              row.edam_input_format == input_format &&
              row.edam_output_data == output_data &&
              row.edam_output_format == output_format ) {
-                // println (">>>>>>>>>>>>>>>>>>>>>" + i)
                 i += 1
-
                 benchmarkDict[ (i) ] = [ benchmarker: row.benchmarker,
-                                          operation: row.edam_operation,
-                                          input_data: row.edam_input_data,
-                                          input_format: row.edam_input_format,
-                                          output_data: row.edam_output_data,
-                                          output_format: row.edam_output_format ]
-                // println (benchmarkDict) //#del
+                                         operation: row.edam_operation,
+                                         input_data: row.edam_input_data,
+                                         input_format: row.edam_input_format,
+                                         output_data: row.edam_output_data,
+                                         output_format: row.edam_output_format ]
         }
     }
     // println (benchmarkDict[1]) //#del
@@ -205,7 +170,7 @@ def setBenchmark (configYmlFile, benchmarkInfo) {
 }
 
 /*
- * Functions returns the test and reference data to be used given the benchmarker
+ * Functions returns the test and reference data to be used given a benchmarker
  */
 def setReference (benchmarkInfo, benchmarkerCsv, refDataCsv) {
 
@@ -227,8 +192,8 @@ def setReference (benchmarkInfo, benchmarkerCsv, refDataCsv) {
         }
     }
 
-    // there can be more than one type of data for a given benchmarker
-    // println "..................." +  refDataDict.size()
+    // There can be more than one type of data for a given benchmarker
+    // println "Type of data for a given benchmarker...................." +  refDataDict.size()
 
     if ( refDataDict.size() > 1 ) exit 1, "Error: More than one possible benchmarker please refine pipeline description for \"${params.pipeline}\" pipeline"
     if ( refDataDict.size() == 0 ) exit 1, "Error: The selected pipeline  \"${params.pipeline}\" is not included in nf-benchmark"
@@ -265,7 +230,6 @@ def setReference (benchmarkInfo, benchmarkerCsv, refDataCsv) {
         hits.map {
             if ( !it ) { exit 1, "Error: No reference data found for benchmarker" }
         }
-
 
     // return [ id, test_data_file, ref_data_file ]
     // return refList

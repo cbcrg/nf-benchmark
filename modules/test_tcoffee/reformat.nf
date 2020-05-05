@@ -1,3 +1,8 @@
+/*
+ * Reformats a MSA produced by t-coffee to fasta
+ * This probably should be included directly inside the align.nf of t-coffee
+ */
+
 params.outdir = ''
 
 process reformat {

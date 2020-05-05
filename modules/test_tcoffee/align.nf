@@ -1,5 +1,9 @@
-params.outdir = ""
-params.output_format = "msf"
+/*
+ * Aligns multiple sequences in a fasta file using t-coffee producing a MSA
+ */
+
+params.outdir = ''
+params.output_format = 'msf'
 
 process align {
     tag {fasta}

@@ -1,3 +1,6 @@
+/*
+ * Benchmark a MSA using baliscore
+ */
 process run_benchmark {
     tag { id }
     publishDir "${params.outdir}/bali_base"

@@ -18,7 +18,7 @@ process REG_ALIGNER {
     file("${id}.reg_${bucket_size}.${align_method}.with.${tree_method}.tree.aln") 
 
     script:
-    template "${baseDir}/modules/nf_regressive_modules/templates/regressive_align/reg_${align_method}.sh"
+    template "${baseDir}/modules/regressive_aln/templates/regressive_align/reg_${align_method}.sh"
 }
 
 process PROG_ALIGNER {
@@ -36,7 +36,7 @@ process PROG_ALIGNER {
     file("${id}.prog.${align_method}.with.${tree_method}.tree.aln") 
 
     script:
-    template "${baseDir}/modules/nf_regressive_modules/templates/progressive_align/prog_${align_method}.sh"
+    template "${baseDir}/modules/regressive_aln/templates/progressive_align/prog_${align_method}.sh"
 }
 
 process SLAVE_ALIGNER {

@@ -67,7 +67,7 @@ log.info """\
 
 // import modules
 // include REG_ANALYSIS from './modules/reg_analysis'
-include REG_ANALYSIS from "${baseDir}/modules/nf_regressive_modules/modules/reg_analysis.nf"
+include REG_ANALYSIS from "${baseDir}/modules/regressive_aln/modules/reg_analysis.nf"
 
 // Channels containing sequences
 

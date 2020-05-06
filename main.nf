@@ -45,6 +45,7 @@ Pipeline: ${params.pipeline}
 
 params.outdir = "${baseDir}/results"
 params.ref_data = ''
+params.skip_benchmark = false
 
 // Include the pipeline of modules if available
 pipeline_module = file( "${baseDir}/modules/${params.pipeline}/main.nf")
@@ -56,7 +57,7 @@ csvPathMethods = "${baseDir}/assets/methods2benchmark.csv"
 csvPathBenchmarker = "${baseDir}/assets/dataFormat2benchmark.csv"
 csvPathReference = "${baseDir}/assets/referenceData.csv"
 
-infoBenchmark = setBenchmark(yamlPath, csvPathMethods)
+infoBenchmark = setBenchmark(yamlPath, csvPathMethods, params.pipeline)
 // println (infoBenchmark) // [benchmarker:bali_score, operation:operation_0492, input_data:data_1233, input_format:format_1929, output_data:data_1384, output_format:format_1984]
 
 ref_data = setReference (infoBenchmark, csvPathBenchmarker, csvPathReference)
@@ -77,13 +78,16 @@ println("Benchmark: ${infoBenchmark.benchmarker}")
 workflow {
 
     pipeline()
-    benchmark (pipeline.out)
-    benchmark.out \
-        | map { it.text } \
-        | collectFile (name: 'scores.csv', newLine: false) \
-        | set { scores }
-    // TODO: output sometimes could be more than just a single score, refactor to be compatible with these cases
-    mean_benchmark_score(scores) // | view
+    
+    if (!params.skip_benchmark) {
+        benchmark (pipeline.out)
+        benchmark.out \
+            | map { it.text } \
+            | collectFile (name: 'scores.csv', newLine: false) \
+            | set { scores }
+        // TODO: output sometimes could be more than just a single score, refactor to be compatible with these cases
+        mean_benchmark_score(scores) // | view
+    }
 }
 
 /*
@@ -117,31 +121,31 @@ def readCsv (pathCsv) {
 
 // MAYBE ALIGNMENT SHOULD BE MODIFIED BY SOMETHING MORE GENERAL
 // benchmarkInfo currently is a CSV but could become a DBs or something else
-def setBenchmark (configYmlFile, benchmarkInfo) {
+def setBenchmark (configYmlFile, benchmarkInfo, pipeline) {
 
     def fileYml = new File(configYmlFile)
     def yaml = new Yaml()
     def pipelineConfig = yaml.load(fileYml.text)
 
-    topic = pipelineConfig.pipeline.tcoffee.edam_topic[0]
-    operation = pipelineConfig.pipeline.tcoffee.edam_operation[0]
+    topic = pipelineConfig.pipeline."$pipeline".edam_topic[0]
+    operation = pipelineConfig.pipeline."$pipeline".edam_operation[0]
 
     input_data = pipelineConfig.input.fasta.edam_data[0][0]
     input_format = pipelineConfig.input.fasta.edam_format[0][0]
     output_data = pipelineConfig.output.alignment.edam_data[0][0]
     output_format = pipelineConfig.output.alignment.edam_format[0][0]
 
-    // println("INFO: Selected pipeline name is: ${pipelineConfig.name}")
-    // println("INFO: Path to yaml pipeline configuration file \"${configYmlFile}\"")
-    // println("INFO: Path to CSV benchmark info file \"${benchmarkInfo}\"")
+    println("INFO: Selected pipeline name is: ${pipelineConfig.name}")
+    println("INFO: Path to yaml pipeline configuration file \"${configYmlFile}\"")
+    println("INFO: Path to CSV benchmark info file \"${benchmarkInfo}\"")
 
-    // println("INFO: Selected edam topic is: $topic")
-    // println("INFO: Selected edam operation is: $operation")
+    println("INFO: Selected edam topic is: $topic")
+    println("INFO: Selected edam operation is: $operation")
 
-    // println("INFO: Input data is: $input_data")
-    // println("INFO: Input format is: ${input_format}")
-    // println("INFO: Output data is: $output_data")
-    // println("INFO: Output format is: ${output_format}")
+    println("INFO: Input data is: $input_data")
+    println("INFO: Input format is: ${input_format}")
+    println("INFO: Output data is: $output_data")
+    println("INFO: Output format is: ${output_format}")
 
     def csvBenchmark = readCsv (benchmarkInfo)
     def benchmarkDict = [:]
@@ -164,7 +168,7 @@ def setBenchmark (configYmlFile, benchmarkInfo) {
     }
     // println (benchmarkDict[1]) //#del
     if ( benchmarkDict.size() > 1 ) exit 1, "Error: More than one possible benchmark please refine pipeline description for \"${params.pipeline}\" pipeline"
-    if ( benchmarkDict.size() == 0 ) exit 1, "Error: The selected pipeline  \"${params.pipeline}\" is not included in nf-benchmark"
+    if ( benchmarkDict.size() == 0 ) exit 1, "Error: No available benchmark for the selected pipeline  \"${params.pipeline}\" is not included in nf-benchmark"
 
     return benchmarkDict [ 1 ]
 }

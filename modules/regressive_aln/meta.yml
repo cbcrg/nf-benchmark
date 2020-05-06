@@ -5,7 +5,7 @@ keywords:
     - multiple sequence aligment
     - regressive alignment
 pipeline:
-    - nf_regressive_modules:
+    - regressive_aln:
         description: |
             Regressive alignment TODO.
         homepage:

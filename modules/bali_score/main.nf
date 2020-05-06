@@ -6,8 +6,8 @@
  */
 
 
-include reformat as reformat_to_benchmark from "${baseDir}/modules/test_bali_score/reformat.nf"
-include run_benchmark from "${baseDir}/modules/test_bali_score/run_benchmark.nf"
+include reformat as reformat_to_benchmark from "${baseDir}/modules/bali_score/reformat.nf"
+include run_benchmark from "${baseDir}/modules/bali_score/run_benchmark.nf"
 
 // Run the workflow
 workflow benchmark {

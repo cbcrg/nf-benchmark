@@ -7,8 +7,8 @@
 params.outdir = ''
 params.ref_data = ''
 
-include align from "${baseDir}/modules/test_tcoffee/align.nf"
-include reformat from "${baseDir}/modules/test_tcoffee/reformat.nf"
+include align from "${baseDir}/modules/tcoffee/align.nf"
+include reformat from "${baseDir}/modules/tcoffee/reformat.nf"
 
 // Run the workflow
 workflow pipeline {

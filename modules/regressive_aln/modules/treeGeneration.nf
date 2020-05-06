@@ -16,5 +16,5 @@ process TREE_GENERATION {
     file("${id}.${tree_method}.dnd") 
 
     script:
-    template "${baseDir}/modules/nf_regressive_modules/templates/tree/tree_${tree_method}.sh"
+    template "${baseDir}/modules/regressive_aln/templates/tree/tree_${tree_method}.sh"
 }

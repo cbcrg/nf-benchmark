@@ -135,17 +135,17 @@ def setBenchmark (configYmlFile, benchmarkInfo, pipeline) {
     output_data = pipelineConfig.output.alignment.edam_data[0][0]
     output_format = pipelineConfig.output.alignment.edam_format[0][0]
 
-    println("INFO: Selected pipeline name is: ${pipelineConfig.name}")
-    println("INFO: Path to yaml pipeline configuration file \"${configYmlFile}\"")
-    println("INFO: Path to CSV benchmark info file \"${benchmarkInfo}\"")
+    // println("INFO: Selected pipeline name is: ${pipelineConfig.name}")
+    // println("INFO: Path to yaml pipeline configuration file \"${configYmlFile}\"")
+    // println("INFO: Path to CSV benchmark info file \"${benchmarkInfo}\"")
 
-    println("INFO: Selected edam topic is: $topic")
-    println("INFO: Selected edam operation is: $operation")
+    // println("INFO: Selected edam topic is: $topic")
+    // println("INFO: Selected edam operation is: $operation")
 
-    println("INFO: Input data is: $input_data")
-    println("INFO: Input format is: ${input_format}")
-    println("INFO: Output data is: $output_data")
-    println("INFO: Output format is: ${output_format}")
+    // println("INFO: Input data is: $input_data")
+    // println("INFO: Input format is: ${input_format}")
+    // println("INFO: Output data is: $output_data")
+    // println("INFO: Output format is: ${output_format}")
 
     def csvBenchmark = readCsv (benchmarkInfo)
     def benchmarkDict = [:]

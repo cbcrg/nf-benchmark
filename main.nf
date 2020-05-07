@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 2020 Centre for Genomic Regulation (CRG)
- * and the authors, Jose Espinosa-Carrasco and Paolo Di Tommaso.
+ * and the authors, Jose Espinosa-Carrasco, Paolo Di Tommaso and Edgar Garriga.
  *
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -21,7 +21,7 @@
  */
 
  /*
- * Proof of concept of benchmark-nf: An automatic benchmarking pipeline implemented with Nextflow
+ * Proof of concept of nf-benchmark: An automatic benchmarking pipeline implemented with Nextflow
  *
  * Authors:
  * - Jose Espinosa-Carrasco <espinosacarrascoj@gmail.com>

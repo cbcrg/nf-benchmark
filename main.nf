@@ -29,7 +29,6 @@
 
 nextflow.preview.dsl = 2
 
-@Grab(group='org.yaml', module='snakeyaml', version='1.5')
 import org.yaml.snakeyaml.Yaml
 
 @Grab('com.xlson.groovycsv:groovycsv:1.0')

@@ -13,6 +13,14 @@ The nf-benchmark documentation is split into the following files:
 4. [Output and how to interpret the results](output.md)
 5. [Troubleshooting](https://nf-co.re/usage/troubleshooting)
 
+## How to run the pipeline
+
+### From a module
+
+#### Regressive-alignment
+
+nextflow run main.nf   params.regressive_align = true  -profile test,docker -resume
+
 ## declare workflow on main as pipeline  
 
 ## Include yml file

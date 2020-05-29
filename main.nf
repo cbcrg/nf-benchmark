@@ -42,9 +42,18 @@ log.info """\
 Pipeline: ${params.pipeline}
 """
 
-params.outdir = "${baseDir}/results"
+params.outdir = "${projectDir}/results"
 params.ref_data = ''
 params.skip_benchmark = false
+
+// Include config of the respective pipeline if the path exists
+/*
+module_config = "${projectDir}/modules/${params.pipeline}/nextflow.config"
+if ( file(module_config).exists() )
+    includeConfig 'module_config'
+else
+    log.info "There is no available config $module_config for pipeline module: $params.pipeline"
+*/
 
 // Include the pipeline of modules if available
 pipeline_module = file( "${baseDir}/modules/${params.pipeline}/main.nf")

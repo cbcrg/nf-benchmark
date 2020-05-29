@@ -15,11 +15,19 @@ The nf-benchmark documentation is split into the following files:
 
 ## How to run the pipeline
 
+### From root
+
+```bash
+nextflow run main.nf --pipeline regressive_alignment -resume --skip_benchmark
+```
+
 ### From a module
 
 #### Regressive-alignment
 
+```bash
 nextflow run main.nf   params.regressive_align = true  -profile test,docker -resume
+```
 
 ## declare workflow on main as pipeline  
 

@@ -18,7 +18,13 @@ The nf-benchmark documentation is split into the following files:
 ### From root
 
 ```bash
-nextflow run main.nf --pipeline regressive_alignment -resume --skip_benchmark
+NXF_VER=20.04.1-edge nextflow run main.nf \
+    --pipeline regressive_alignment \
+    --regressive_align true \
+    --align_methods "CLUSTALO" \
+    --skip_benchmark \
+    -profile test,docker \
+    -resume
 ```
 
 ### From a module
@@ -26,7 +32,13 @@ nextflow run main.nf --pipeline regressive_alignment -resume --skip_benchmark
 #### Regressive-alignment
 
 ```bash
-nextflow run main.nf   params.regressive_align = true  -profile test,docker -resume
+NXF_VER=20.04.1-edge nextflow run main.nf \
+    --pipeline regressive_alignment \
+    --regressive_align true \
+    --align_methods "CLUSTALO" \
+    --skip_benchmark \
+    -profile test,docker \
+    -resume
 ```
 
 ## declare workflow on main as pipeline  

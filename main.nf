@@ -66,7 +66,7 @@ csvPathBenchmarker = "${baseDir}/assets/dataFormat2benchmark.csv"
 csvPathReference = "${baseDir}/assets/referenceData.csv"
 
 infoBenchmark = setBenchmark(yamlPath, csvPathMethods, params.pipeline)
-// println (infoBenchmark) // [benchmarker:bali_score, operation:operation_0492, input_data:data_1233, input_format:format_1929, output_data:data_1384, output_format:format_1984]
+// log.info (infoBenchmark) // [benchmarker:bali_score, operation:operation_0492, input_data:data_1233, input_format:format_1929, output_data:data_1384, output_format:format_1984]
 
 ref_data = setReference (infoBenchmark, csvPathBenchmarker, csvPathReference)
 params.ref_data = ref_data
@@ -75,7 +75,9 @@ include pipeline from  "${baseDir}/modules/${params.pipeline}/main.nf" params(pa
 include benchmark from "${baseDir}/modules/${infoBenchmark.benchmarker}/main.nf" params(params)
 include mean_benchmark_score from "${baseDir}/modules/mean_benchmark_score/main.nf" //TODO make it generic
 
-println("Benchmark: ${infoBenchmark.benchmarker}")
+log.info """
+   Benchmark: ${infoBenchmark.benchmarker}
+"""
 
 // Hardcodes testing #del
 // aligment BB11001
@@ -144,17 +146,20 @@ def setBenchmark (configYmlFile, benchmarkInfo, pipeline) {
     output_data = pipelineConfig.output.alignment.edam_data[0][0]
     output_format = pipelineConfig.output.alignment.edam_format[0][0]
 
-    // println("INFO: Selected pipeline name is: ${pipelineConfig.name}")
-    // println("INFO: Path to yaml pipeline configuration file \"${configYmlFile}\"")
-    // println("INFO: Path to CSV benchmark info file \"${benchmarkInfo}\"")
+    /*
+    log.info """
+    INFO: Selected pipeline name is: ${pipelineConfig.name}
+    INFO: Path to yaml pipeline configuration file \"${configYmlFile}\"
+    INFO: Path to CSV benchmark info file \"${benchmarkInfo}\"
+    INFO: Selected edam topic is: $topic
+    INFO: Selected edam operation is: $operation
 
-    // println("INFO: Selected edam topic is: $topic")
-    // println("INFO: Selected edam operation is: $operation")
-
-    // println("INFO: Input data is: $input_data")
-    // println("INFO: Input format is: ${input_format}")
-    // println("INFO: Output data is: $output_data")
-    // println("INFO: Output format is: ${output_format}")
+    INFO: Input data is: $input_data
+    INFO: Input format is: ${input_format}
+    INFO: Output data is: $output_data
+    INFO: Output format is: ${output_format}
+    """
+    */
 
     def csvBenchmark = readCsv (benchmarkInfo)
     def benchmarkDict = [:]
@@ -175,7 +180,7 @@ def setBenchmark (configYmlFile, benchmarkInfo, pipeline) {
                                          output_format: row.edam_output_format ]
         }
     }
-    // println (benchmarkDict[1]) //#del
+    // log.info "benchmarkDict[1]" //#del
     if ( benchmarkDict.size() > 1 ) exit 1, "Error: More than one possible benchmark please refine pipeline description for \"${params.pipeline}\" pipeline"
     if ( benchmarkDict.size() == 0 ) exit 1, "Error: No available benchmark for the selected pipeline  \"${params.pipeline}\" is not included in nf-benchmark"
 
@@ -206,7 +211,7 @@ def setReference (benchmarkInfo, benchmarkerCsv, refDataCsv) {
     }
 
     // There can be more than one type of data for a given benchmarker
-    // println "Type of data for a given benchmarker...................." +  refDataDict.size()
+    // log.info "Type of data for a given benchmarker...................." +  refDataDict.size()
 
     if ( refDataDict.size() > 1 ) exit 1, "Error: More than one possible benchmarker please refine pipeline description for \"${params.pipeline}\" pipeline"
     if ( refDataDict.size() == 0 ) exit 1, "Error: The selected pipeline  \"${params.pipeline}\" is not included in nf-benchmark"
@@ -217,7 +222,7 @@ def setReference (benchmarkInfo, benchmarkerCsv, refDataCsv) {
 
     for( row in refData ) {
         if ( row.benchmarker == refDataHit.benchmarker) {
-            // println ( row.id + "===" + row.id + row.test_data_format + "===" + row.id +  row.ref_data_format ) //#del
+            //log.info ( row.id + "===" + row.id + row.test_data_format + "===" + row.id +  row.ref_data_format ) //#del
             id = row.id
             test_data_file = row.id + row.test_data_format
             ref_data_file = row.id + row.ref_data_format

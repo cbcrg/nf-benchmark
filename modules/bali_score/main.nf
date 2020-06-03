@@ -19,3 +19,7 @@ workflow benchmark {
     emit:
       run_benchmark.out
 }
+
+workflow {
+  benchamrk()
+}

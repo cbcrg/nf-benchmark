@@ -20,3 +20,7 @@ workflow pipeline {
     emit:
       reformat.out
 }
+
+workflow {
+  pipeline()
+}

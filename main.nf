@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 2020 Centre for Genomic Regulation (CRG)
- * and the authors, Jose Espinosa-Carrasco, Paolo Di Tommaso and Edgar Garriga.
+ * and the authors, Jose Espinosa-Carrasco, Paolo Di Tommaso§.
  *
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -41,9 +41,9 @@ log.info """\
 ===================================
 Pipeline: ${params.pipeline}
 """
-
+projectDir = "${baseDir}"
 params.outdir = "${projectDir}/results"
-params.ref_data = ''
+// params.ref_data = ''
 params.skip_benchmark = false
 
 // Include config of the respective pipeline if the path exists
@@ -69,10 +69,11 @@ infoBenchmark = setBenchmark(yamlPath, csvPathMethods, params.pipeline)
 // println (infoBenchmark) // [benchmarker:bali_score, operation:operation_0492, input_data:data_1233, input_format:format_1929, output_data:data_1384, output_format:format_1984]
 
 ref_data = setReference (infoBenchmark, csvPathBenchmarker, csvPathReference)
+params.ref_data = ref_data
 
-include pipeline from  "${baseDir}/modules/${params.pipeline}/main.nf" params(outdir: params.outdir, ref_data: ref_data)
-include benchmark from "${baseDir}/modules/${infoBenchmark.benchmarker}/main.nf"
-include mean_benchmark_score from "${baseDir}/modules/mean_benchmark_score/main.nf"
+include pipeline from  "${baseDir}/modules/${params.pipeline}/main.nf" params(params)
+include benchmark from "${baseDir}/modules/${infoBenchmark.benchmarker}/main.nf" params(params)
+include mean_benchmark_score from "${baseDir}/modules/mean_benchmark_score/main.nf" //TODO make it generic
 
 println("Benchmark: ${infoBenchmark.benchmarker}")
 

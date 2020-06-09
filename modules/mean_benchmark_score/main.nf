@@ -1,7 +1,7 @@
 process mean_benchmark_score {
     tag { 'benchmark_mean' }
     publishDir "${params.outdir}/tcoffee"
-    container 'r-base@sha256:544384846abe657672f041d8b8c23142c2ffc244280f032a449f6cc3a1caedb1'
+    container 'joseespinosa/r-base@sha256:cc35d5e41d1252709b3c9c8a166daaab7e3231ec57a97113814f0345fcf19b54'
 
     input:
     file (scores)

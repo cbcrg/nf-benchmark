@@ -14,7 +14,7 @@ jobs:
       matrix:
         # Nextflow versions: check pipeline minimum and current latest
         nxf_ver: ['20.04.1-edge']
-        paramPipeline: [--pipeline=tcoffee]
+        paramPipeline: [--pipeline tcoffee]
     steps:
       - uses: actions/checkout@v2
       - name: Install Nextflow
@@ -25,6 +25,27 @@ jobs:
         run: |
           nextflow run ${GITHUB_WORKSPACE} ${{matrix.paramPipeline}}
 
+  test_regressive_alignment:
+    env:
+      NXF_VER: ${{ matrix.nxf_ver }}
+      NXF_ANSI_LOG: false
+    runs-on: ubuntu-latest
+    if: "!contains(github.event.head_commit.message, '[ci skip]')"
+    strategy:
+      matrix:
+        # Nextflow versions: check pipeline minimum and current latest
+        nxf_ver: ['20.04.1-edge']
+        paramPipeline: ['--pipeline regressive_alignment --regressive_align true -align_methods CLUSTALO --skip_benchmark -profile test,docker']
+
+    steps:
+      - uses: actions/checkout@v2
+      - name: Install Nextflow
+        run: |
+          wget -qO- get.nextflow.io | bash
+          sudo mv nextflow /usr/local/bin/
+      - name: Run pipeline as a demo with tcoffee as the pipeline and balibase as benchmarker
+        run: |
+          nextflow run ${GITHUB_WORKSPACE} ${{matrix.paramPipeline}}
 #      - name: Run pipeline with test data
 #        run: |
 #          nextflow run ${GITHUB_WORKSPACE} -profile test,docker

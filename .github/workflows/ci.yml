@@ -17,11 +17,18 @@ jobs:
         paramPipeline: [--pipeline tcoffee]
     steps:
       - uses: actions/checkout@v2
+      - name: Checkout submodules
+        shell: bash
+        run: |
+          auth_header="$(git config --local --get http.https://github.com/.extraheader)"
+          git submodule sync --recursive
+          git -c "http.extraheader=$auth_header" -c protocol.version=2 submodule update --init --force --recursive --depth=1
+
       - name: Install Nextflow
         run: |
           wget -qO- get.nextflow.io | bash
           sudo mv nextflow /usr/local/bin/
-      - name: Run pipeline as a demo with tcoffee as the pipeline and balibase as benchmarker
+      - name: Run pipeline as a demo with tcoffee as the pipeline and balibase as the benchmarker
         run: |
           nextflow run ${GITHUB_WORKSPACE} ${{matrix.paramPipeline}}
 
@@ -43,7 +50,7 @@ jobs:
         run: |
           wget -qO- get.nextflow.io | bash
           sudo mv nextflow /usr/local/bin/
-      - name: Run pipeline as a demo with tcoffee as the pipeline and balibase as benchmarker
+      - name: Runs regressive_alignment pipeline on test mode
         run: |
           nextflow run ${GITHUB_WORKSPACE} ${{matrix.paramPipeline}}
 #      - name: Run pipeline with test data

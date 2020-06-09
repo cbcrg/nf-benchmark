@@ -35,7 +35,7 @@ jobs:
       matrix:
         # Nextflow versions: check pipeline minimum and current latest
         nxf_ver: ['20.04.1-edge']
-        paramPipeline: ['--pipeline regressive_alignment --regressive_align true -align_methods CLUSTALO --skip_benchmark -profile test,docker']
+        paramPipeline: ['--pipeline regressive_alignment --regressive_align true --align_methods CLUSTALO --skip_benchmark -profile test,docker']
 
     steps:
       - uses: actions/checkout@v2

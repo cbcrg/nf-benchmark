@@ -32,32 +32,7 @@ jobs:
         run: |
           nextflow run ${GITHUB_WORKSPACE} ${{matrix.paramPipeline}} -profile test,docker
 
-  parameters:
-    env:
-      NXF_VER: ${{ matrix.nxf_ver }}
-      NXF_ANSI_LOG: false
-      runs-on: ubuntu-latest
-      strategy:
-        matrix:
-          # Nextflow versions: check pipeline minimum and current latest
-          nxf_ver: ['20.04.1-edge']
-          paramPipeline: ['--pipeline regressive_alignment --regressive_align true --align_methods CLUSTALO --skip_benchmark']
-      steps:
-        # Check out the repository
-        - uses: actions/checkout@v2
-        - name: Checkout submodules
-          shell: bash
-          run: |
-            auth_header="$(git config --local --get http.https://github.com/.extraheader)"
-            git submodule sync --recursive
-            git -c "http.extraheader=$auth_header" -c protocol.version=2 submodule update --init --force --recursive --depth=1
-        - name: Install Nextflow
-          run: |
-            wget -qO- get.nextflow.io | bash
-            sudo mv nextflow /usr/local/bin/
-        - name: Runs regressive_alignment pipeline on test mode
-          run: |
-            nextflow run ${GITHUB_WORKSPACE} ${{matrix.paramPipeline}} -profile test,docker
+
 
 #jobs:
 #  test:

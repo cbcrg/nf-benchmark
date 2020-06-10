@@ -17,12 +17,14 @@ jobs:
         paramPipeline: [--pipeline tcoffee]
     steps:
       - uses: actions/checkout@v2
-      - name: Checkout submodules
-        shell: bash
-        run: |
-          auth_header="$(git config --local --get http.https://github.com/.extraheader)"
-          git submodule sync --recursive
-          git -c "http.extraheader=$auth_header" -c protocol.version=2 submodule update --init --force --recursive --depth=1
+        with:
+          submodules: true
+#      - name: Checkout submodules
+#        shell: bash
+#        run: |
+#          auth_header="$(git config --local --get http.https://github.com/.extraheader)"
+#          git submodule sync --recursive
+#          git -c "http.extraheader=$auth_header" -c protocol.version=2 submodule update --init --force --recursive --depth=1
 
       - name: Install Nextflow
         run: |

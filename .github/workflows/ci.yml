@@ -3,87 +3,84 @@ name: nf-benchmark CI
 # It runs the pipeline with the minimal test dataset to check that it completes without any syntax errors
 on: [push, pull_request]
 
-jobs:
-  run_ci_test:
-    env:
-      NXF_VER: ${{ matrix.nxf_ver }}
-      NXF_ANSI_LOG: false
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        # Nextflow versions: check pipeline minimum and current latest
-        nxf_ver: ['20.04.1-edge']
-        paramPipeline: ['--pipeline regressive_alignment --regressive_align true --align_methods CLUSTALO --skip_benchmark -profile test,docker']
-    steps:
-      # Check out the repository
-      - uses: actions/checkout@v2
-      - name: Checkout submodules
-        shell: bash
-        run: |
-          auth_header="$(git config --local --get http.https://github.com/.extraheader)"
-          git submodule sync --recursive
-          git -c "http.extraheader=$auth_header" -c protocol.version=2 submodule update --init --force --recursive --depth=1
-      - name: Install Nextflow
-        run: |
-          wget -qO- get.nextflow.io | bash
-          sudo mv nextflow /usr/local/bin/
-      - name: Test module with paired-end data
-        run: |
-          nextflow run ${GITHUB_WORKSPACE} ${{matrix.paramPipeline}} -profile test,docker
 #jobs:
-#  test:
+#  run_ci_test:
 #    env:
 #      NXF_VER: ${{ matrix.nxf_ver }}
 #      NXF_ANSI_LOG: false
 #    runs-on: ubuntu-latest
-#    if: "!contains(github.event.head_commit.message, '[ci skip]')"
 #    strategy:
 #      matrix:
 #        # Nextflow versions: check pipeline minimum and current latest
 #        nxf_ver: ['20.04.1-edge']
-#        paramPipeline: [--pipeline tcoffee]
+#        paramPipeline: ['--pipeline regressive_alignment --regressive_align true --align_methods CLUSTALO --skip_benchmark']
 #    steps:
+#      # Check out the repository
 #      - uses: actions/checkout@v2
-##        with:
-##          submodules: true
-#
 #      - name: Checkout submodules
 #        shell: bash
 #        run: |
 #          auth_header="$(git config --local --get http.https://github.com/.extraheader)"
-#          echo "$auth_header ..........\n"
 #          git submodule sync --recursive
 #          git -c "http.extraheader=$auth_header" -c protocol.version=2 submodule update --init --force --recursive --depth=1
-#
-#      - name: Install Nextflow
-#        run: |
-#          wget -qO- get.nextflow.io | bash
-#          sudo mv nextflow /usr/local/bin/
-#      - name: Run pipeline as a demo with tcoffee as the pipeline and balibase as the benchmarker
-#        run: |
-#          nextflow run ${GITHUB_WORKSPACE} ${{matrix.paramPipeline}}
-#
-#  test_regressive_alignment:
-#    env:
-#      NXF_VER: ${{ matrix.nxf_ver }}
-#      NXF_ANSI_LOG: false
-#    runs-on: ubuntu-latest
-#    if: "!contains(github.event.head_commit.message, '[ci skip]')"
-#    strategy:
-#      matrix:
-#        # Nextflow versions: check pipeline minimum and current latest
-#        nxf_ver: ['20.04.1-edge']
-#        paramPipeline: ['--pipeline regressive_alignment --regressive_align true --align_methods CLUSTALO --skip_benchmark -profile test,docker']
-#
-#    steps:
-#      - uses: actions/checkout@v2
 #      - name: Install Nextflow
 #        run: |
 #          wget -qO- get.nextflow.io | bash
 #          sudo mv nextflow /usr/local/bin/
 #      - name: Runs regressive_alignment pipeline on test mode
 #        run: |
-#          nextflow run ${GITHUB_WORKSPACE} ${{matrix.paramPipeline}}
-##      - name: Run pipeline with test data
-##        run: |
-##          nextflow run ${GITHUB_WORKSPACE} -profile test,docker
+#          nextflow run ${GITHUB_WORKSPACE} ${{matrix.paramPipeline}} -profile test,docker
+jobs:
+  test:
+    env:
+      NXF_VER: ${{ matrix.nxf_ver }}
+      NXF_ANSI_LOG: false
+    runs-on: ubuntu-latest
+    if: "!contains(github.event.head_commit.message, '[ci skip]')"
+    strategy:
+      matrix:
+        # Nextflow versions: check pipeline minimum and current latest
+        nxf_ver: ['20.04.1-edge']
+        paramPipeline: [--pipeline tcoffee]
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Checkout submodules
+        shell: bash
+        run: |
+          auth_header="$(git config --local --get http.https://github.com/.extraheader)"
+          git submodule sync --recursive
+          git -c "http.extraheader=$auth_header" -c protocol.version=2 submodule update --init --force --recursive --depth=1
+
+      - name: Install Nextflow
+        run: |
+          wget -qO- get.nextflow.io | bash
+          sudo mv nextflow /usr/local/bin/
+      - name: Run pipeline as a demo with tcoffee as the pipeline and balibase as the benchmarker
+        run: |
+          nextflow run ${GITHUB_WORKSPACE} ${{matrix.paramPipeline}}
+
+  test_regressive_alignment:
+    env:
+      NXF_VER: ${{ matrix.nxf_ver }}
+      NXF_ANSI_LOG: false
+    runs-on: ubuntu-latest
+    if: "!contains(github.event.head_commit.message, '[ci skip]')"
+    strategy:
+      matrix:
+        # Nextflow versions: check pipeline minimum and current latest
+        nxf_ver: ['20.04.1-edge']
+        paramPipeline: ['--pipeline regressive_alignment --regressive_align true --align_methods CLUSTALO --skip_benchmark']
+
+    steps:
+      - uses: actions/checkout@v2
+      - name: Install Nextflow
+        run: |
+          wget -qO- get.nextflow.io | bash
+          sudo mv nextflow /usr/local/bin/
+      - name: Runs regressive_alignment pipeline on test mode
+        run: |
+          nextflow run ${GITHUB_WORKSPACE} ${{matrix.paramPipeline}} -profile test,docker
+#      - name: Run pipeline with test data
+#        run: |
+#          nextflow run ${GITHUB_WORKSPACE} -profile test,docker

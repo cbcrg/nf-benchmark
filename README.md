@@ -20,9 +20,9 @@ The nf-benchmark documentation is split into the following files:
 ```bash
 NXF_VER=20.04.1-edge nextflow run main.nf \
     --pipeline regressive_alignment \
-    --regressive_align true \
-    --align_methods "CLUSTALO" \
-    --skip_benchmark \
+    --regressive_align false \
+    --align_methods CLUSTALO \
+    --evaluate false \
     -profile test,docker \
     -resume
 ```
@@ -33,15 +33,27 @@ NXF_VER=20.04.1-edge nextflow run main.nf \
 
 ```bash
 NXF_VER=20.04.1-edge nextflow run main.nf \
-    --pipeline regressive_alignment \
     --regressive_align true \
-    --align_methods "CLUSTALO" \
-    --skip_benchmark \
+    --align_methods CLUSTALO \
+    -profile test,docker \
+    -resume
+```
+
+#### Directly run regressive alignment pipeline
+
+```bash
+NXF_VER=20.04.1-edge nextflow run main.nf \
+    --regressive_align true \
+    --align_methods CLUSTALO \
     -profile test,docker \
     -resume
 ```
 
 ## declare workflow on main as pipeline  
+
+```bash
+NXF_VER=20.04.1-edge nextflow run main.nf --regressive_align false --align_methods "CLUSTALO" --evaluate false -profile test,docker -resume
+```
 
 ## Include yml file
 

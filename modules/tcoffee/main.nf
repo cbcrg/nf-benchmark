@@ -4,21 +4,31 @@
  * pipeline but not the benchmark steps
  */
 
-params.outdir = ''
-params.ref_data = ''
+// input sequences to align in fasta format
+// params.sequences = "${baseDir}/test/sequences/input/BB11001.fa"
+// params.reference = "${baseDir}/test/sequences/reference/BB11001.xml.ref"
 
+params.sequences = ''
+params.outdir = ''
+params.ref_data = '' // TODO del
+
+// Set sequences channel
+sequences_ch = Channel.fromPath( params.sequences, checkIfExists: true ).map { item -> [ item.baseName, item ] }
 include align from "${baseDir}/modules/tcoffee/align.nf"
-include reformat from "${baseDir}/modules/tcoffee/reformat.nf"
+// include reformat from "${baseDir}/modules/tcoffee/reformat.nf"
 
 // Run the workflow
 workflow pipeline {
     main:
     // Channel.from(params.ref_data) \
-    align (params.ref_data) \
-      | reformat
+    //align (params.ref_data) \
+
+    align (sequences_ch) //\
+    //  | reformat
 
     emit:
-      reformat.out
+      // reformat.out
+      align.out
 }
 
 workflow {

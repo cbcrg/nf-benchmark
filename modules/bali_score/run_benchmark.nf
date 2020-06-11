@@ -14,6 +14,7 @@ process run_benchmark {
 
     script:
     """
+    ## bali_score ${ref_aln} ${target_aln} > score.out
     bali_score ${ref_aln} ${target_aln} | grep auto | awk '{ print \$3 }' > score.out
     """
 }

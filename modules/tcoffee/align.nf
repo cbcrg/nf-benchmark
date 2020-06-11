@@ -3,19 +3,21 @@
  */
 
 params.outdir = ''
-params.output_format = 'msf'
+// params.output_format = 'msf'
+params.output_format = 'fasta_aln'
 
 process align {
-    tag {fasta}
+    tag {id}
     publishDir "${params.outdir}/tcoffee"
     container 'quay.io/biocontainers/t_coffee:11.0.8--py27pl5.22.0_5'
 
     input:
-    tuple val (id), file (fasta), file (reference)
+    tuple val (id), file (fasta)// , file (reference)
 
     output:
     // tuple val (id), path ("${fasta}.aln.fasta"), path (reference)
-    tuple val (id), path ("${fasta}.${params.output_format}"), path (reference)
+    // tuple val (id), path ("${fasta}.${params.output_format}"), path (reference)
+    tuple val (id), path ("${fasta}.${params.output_format}")
 
     script:
     """

@@ -2,7 +2,7 @@ name: tcoffee
 description: Run tcofee multiple sequence alignment
 keywords:
     - MSA
-    - multiple sequence aligment
+    - multiple sequence alignment
     - sequence aligment
 pipeline:
     - tcoffee:
@@ -17,6 +17,7 @@ pipeline:
         edam_operation: operation_0492
 input:
     -
+        - input_param: sequences
         - fasta:
             type: path
             edam_data: data_1233
@@ -26,6 +27,7 @@ input:
             pattern: '*.{fasta,fa,tfa}'
 output:
     -
+        - output_param: '--input'
         - alignment:
             type: file
             edam_data: data_1384

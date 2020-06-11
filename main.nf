@@ -44,6 +44,7 @@ Pipeline: ${params.pipeline}
 projectDir = "${baseDir}"
 params.outdir = "${projectDir}/results"
 // params.ref_data = ''
+// params.sequences = ''
 params.skip_benchmark = false
 
 // Include config of the respective pipeline if the path exists
@@ -60,26 +61,65 @@ pipeline_module = file( "${baseDir}/modules/${params.pipeline}/main.nf")
 if( !pipeline_module.exists() ) exit 1, "ERROR: The selected pipeline is not included in nf-benchmark: ${params.pipeline}"
 
 // Pipeline meta-information from the pipeline
-yamlPath = "${baseDir}/modules/${params.pipeline}/meta.yml"
+yamlPathPipeline = "${baseDir}/modules/${params.pipeline}/meta.yml"
 csvPathMethods = "${baseDir}/assets/methods2benchmark.csv"
 csvPathBenchmarker = "${baseDir}/assets/dataFormat2benchmark.csv"
 csvPathReference = "${baseDir}/assets/referenceData.csv"
 
-infoBenchmark = setBenchmark(yamlPath, csvPathMethods, params.pipeline)
+infoBenchmark = setBenchmark(yamlPathPipeline, csvPathMethods, params.pipeline)
 // log.info (infoBenchmark) // [benchmarker:bali_score, operation:operation_0492, input_data:data_1233, input_format:format_1929, output_data:data_1384, output_format:format_1984]
 
-ref_data = setReference (infoBenchmark, csvPathBenchmarker, csvPathReference)
+ref_data = setReferenceOld (infoBenchmark, csvPathBenchmarker, csvPathReference)
 params.ref_data = ref_data
+
+//Interpolate input dataset read from yml
+// Can I use a function to override a param?
+
+/*
+ * Get name of the input parameter of pipeline
+ */
+include set_input_param from './resources/functions.nf'
+include setReference from './resources/functions.nf'
+
+// input_params_name = 'sequences'
+// set_input_param(yamlPathPipeline)
+input_pipeline_param = set_input_param(yamlPathPipeline)
+
+if (!params.skip_benchmark) {
+  yamlPathBenchmark = "${baseDir}/modules/${infoBenchmark.benchmarker}/meta.yml"
+  input_benchmark_param = set_input_param(yamlPathBenchmark)
+}
+
+// println "$input_pipeline_param ...................test\n" //#del
+// Assign the input parameter
+// TODO Deal with test config test data TRY WITH EMPTY PARAM if param = "" set this one
+// if is set by test config do not reset?
+
+// Set input and reference data sets
+(input_data, ref_data) = setReference (infoBenchmark, csvPathBenchmarker, csvPathReference)
+//println (">>>>>>>>>>> $input_data\n")//#del
+//println (">>>>>>>>>>> $ref_data\n")//#del
+
+params[input_pipeline_param] = input_data
+// params['reference'] = ref_data
+params[input_benchmark_param] = ref_data
+
+// Hardcodes testing #del
+// params[input_pipeline_param] = "${baseDir}/reference_dataset/BB11001.fa" //#del
+// params['reference'] = "${baseDir}/reference_dataset/BB11001.xml" //#del
+
+/*
+log.info """
+        Info: see here
+        ${params.sequences}
+        """.stripIndent()
+*/
 
 include pipeline from  "${baseDir}/modules/${params.pipeline}/main.nf" params(params)
 include benchmark from "${baseDir}/modules/${infoBenchmark.benchmarker}/main.nf" params(params)
 include mean_benchmark_score from "${baseDir}/modules/mean_benchmark_score/main.nf" //TODO make it generic
 
-log.info """
-   Benchmark: ${infoBenchmark.benchmarker}
-"""
 
-// Hardcodes testing #del
 // aligment BB11001
 // params.sequences = "${baseDir}/test/sequences/input/BB11001.fa"
 // params.reference = "${baseDir}/test/sequences/reference/BB11001.xml.ref"
@@ -89,15 +129,25 @@ log.info """
 workflow {
 
     pipeline()
-    
+    // pipeline() | view
+    // println (pipeline.out)
+    // pipeline.out.view()
+
+    // I need to declare the output of the pipeline that the benchmark should use
     if (!params.skip_benchmark) {
-        benchmark (pipeline.out)
+
+        log.info """
+        Benchmark: ${infoBenchmark.benchmarker}
+        """
+
+        benchmark (pipeline.out) //TODO reference should be a param
+        //benchmark(pipeline['alignmentFile'])
         benchmark.out \
             | map { it.text } \
             | collectFile (name: 'scores.csv', newLine: false) \
             | set { scores }
         // TODO: output sometimes could be more than just a single score, refactor to be compatible with these cases
-        mean_benchmark_score(scores) // | view
+        mean_benchmark_score(scores) | view
     }
 }
 
@@ -190,7 +240,7 @@ def setBenchmark (configYmlFile, benchmarkInfo, pipeline) {
 /*
  * Functions returns the test and reference data to be used given a benchmarker
  */
-def setReference (benchmarkInfo, benchmarkerCsv, refDataCsv) {
+def setReferenceOld (benchmarkInfo, benchmarkerCsv, refDataCsv) {
 
     def dataFormat2benchmark = readCsv(benchmarkerCsv)
     def refData = readCsv(refDataCsv)

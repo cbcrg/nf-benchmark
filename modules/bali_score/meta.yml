@@ -5,10 +5,10 @@ keywords:
     - evaluation of multiple sequence aligment
 pipeline:
     - benchmark:
-        description: |
-            Bali score TODO.
+        description: | #TODO
+            Bali score
         homepage:
-        documentation: TODO
+        documentation: #TODO
         edam_topic: topic_0091
         edam_operation: operation_0492
 input:

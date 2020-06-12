@@ -41,6 +41,7 @@ log.info """\
 ===================================
 Pipeline: ${params.pipeline}
 """
+params.pipeline = ''
 projectDir = "${baseDir}"
 params.outdir = "${projectDir}/results"
 // params.ref_data = ''
@@ -61,7 +62,7 @@ pipeline_module = file( "${baseDir}/modules/${params.pipeline}/main.nf")
 if( !pipeline_module.exists() ) exit 1, "ERROR: The selected pipeline is not included in nf-benchmark: ${params.pipeline}"
 
 // Pipeline meta-information from the pipeline
-yamlPathPipeline = "${baseDir}/modules/${params.pipeline}/meta.yml"
+yamlPathPipeline = "${baseDir}/modules/${params.pipeline}/meta.yml" //TODO check if exists
 csvPathMethods = "${baseDir}/assets/methods2benchmark.csv"
 csvPathBenchmarker = "${baseDir}/assets/dataFormat2benchmark.csv"
 csvPathReference = "${baseDir}/assets/referenceData.csv"
@@ -69,8 +70,8 @@ csvPathReference = "${baseDir}/assets/referenceData.csv"
 infoBenchmark = setBenchmark(yamlPathPipeline, csvPathMethods, params.pipeline)
 // log.info (infoBenchmark) // [benchmarker:bali_score, operation:operation_0492, input_data:data_1233, input_format:format_1929, output_data:data_1384, output_format:format_1984]
 
-ref_data = setReferenceOld (infoBenchmark, csvPathBenchmarker, csvPathReference)
-params.ref_data = ref_data
+// ref_data = setReferenceOld (infoBenchmark, csvPathBenchmarker, csvPathReference) //#del
+// params.ref_data = ref_data //#del
 
 //Interpolate input dataset read from yml
 // Can I use a function to override a param?

@@ -10,7 +10,7 @@
 
 params.sequences = ''
 params.outdir = ''
-params.ref_data = '' // TODO del
+params.ref_data = '' // TODO #del
 
 // Set sequences channel
 sequences_ch = Channel.fromPath( params.sequences, checkIfExists: true ).map { item -> [ item.baseName, item ] }

@@ -18,7 +18,7 @@ pipeline:
 input:
     -
         - input_param: sequences
-        - fasta:
+        - fasta: # this could be substitute by input_param
             type: path
             edam_data: data_1233
             edam_format: format_1929
@@ -27,7 +27,7 @@ input:
             pattern: '*.{fasta,fa,tfa}'
 output:
     -
-        - output_param: '--input'
+        - output_param: '--input' // TODO remove or redesign if needed
         - alignment:
             type: file
             edam_data: data_1384

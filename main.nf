@@ -68,6 +68,17 @@ pipeline_path = "${path_to_pipelines}/${params.pipeline}"
 pipeline_module = file( "${pipeline_path}/main.nf" )
 if( !pipeline_module.exists() ) exit 1, "ERROR: The selected pipeline is not correctly included in nf-benchmark: ${params.pipeline}"
 
+/*
+if (workflow.profile == "test_nfb") {
+  test_nfb_path = file ( params.test_nfb )
+  if( !test_nfb_path.exists() ) exit 1, "ERROR: The selected pipeline \"${params.pipeline}\" needs a test configuration for nf-benchmark under ${pipeline_path}/conf/test_nfb.config or provided using \"--test_nfb\""
+   //under "${pipeline_path}/conf/test_nfb.config or provided using \"--test_nfb\""
+}
+*/
+test_config = file( "${pipeline_path}/conf/test_nfb.config" ) // TODO params!!!
+
+
+
 // Pipeline meta-information from the pipeline
 yamlPathPipeline = "${pipeline_path}/meta.yml" //TODO check if exists
 

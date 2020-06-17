@@ -14,7 +14,7 @@ params.ref_data = '' // TODO #del
 
 // Set sequences channel
 sequences_ch = Channel.fromPath( params.sequences, checkIfExists: true ).map { item -> [ item.baseName, item ] }
-include align from "${baseDir}/modules/tcoffee/align.nf"
+include align from "${moduleDir}/align.nf"
 // include reformat from "${baseDir}/modules/tcoffee/reformat.nf"
 
 // Run the workflow

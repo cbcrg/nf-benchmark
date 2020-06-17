@@ -57,12 +57,20 @@ else
     log.info "There is no available config $module_config for pipeline module: $params.pipeline"
 */
 
-// Include the pipeline of modules if available
-pipeline_module = file( "${baseDir}/modules/${params.pipeline}/main.nf")
-if( !pipeline_module.exists() ) exit 1, "ERROR: The selected pipeline is not included in nf-benchmark: ${params.pipeline}"
+// Pipeline
+// Include the pipeline from the modules path if available
+path_to_pipelines =  "${projectDir}/modules/pipelines"
+pipeline_path = "${path_to_pipelines}/${params.pipeline}"
+pipeline_module = file( "${pipeline_path}/main.nf" )
+if( !pipeline_module.exists() ) exit 1, "ERROR: The selected pipeline is not correctly included in nf-benchmark: ${params.pipeline}"
 
 // Pipeline meta-information from the pipeline
-yamlPathPipeline = "${baseDir}/modules/${params.pipeline}/meta.yml" //TODO check if exists
+yamlPathPipeline = "${pipeline_path}/meta.yml" //TODO check if exists
+
+// Benchmark
+path_to_benchmarks =  "${projectDir}/modules/benchmarks"
+
+
 csvPathMethods = "${baseDir}/assets/methods2benchmark.csv"
 csvPathBenchmarker = "${baseDir}/assets/dataFormat2benchmark.csv"
 csvPathReference = "${baseDir}/assets/referenceData.csv"
@@ -87,7 +95,12 @@ include setReference from './resources/functions.nf'
 input_pipeline_param = set_input_param(yamlPathPipeline)
 
 if (!params.skip_benchmark) {
-  yamlPathBenchmark = "${baseDir}/modules/${infoBenchmark.benchmarker}/meta.yml"
+  benchmark_path = "${path_to_benchmarks}/${infoBenchmark.benchmarker}"
+  benchmark_module = file( "${benchmark_path}/main.nf" )
+  if( !benchmark_module.exists() ) exit 1, "ERROR: The selected benchmark is not correctly included in nf-benchmark: ${infoBenchmark.benchmarker}"
+
+  // yamlPathBenchmark = "${baseDir}/modules/benchmarks/${infoBenchmark.benchmarker}/meta.yml"
+  yamlPathBenchmark = "${benchmark_path}/meta.yml"
   input_benchmark_param = set_input_param(yamlPathBenchmark)
 }
 
@@ -116,10 +129,11 @@ log.info """
         """.stripIndent()
 */
 
-include pipeline from  "${baseDir}/modules/${params.pipeline}/main.nf" params(params)
-include benchmark from "${baseDir}/modules/${infoBenchmark.benchmarker}/main.nf" params(params)
-include mean_benchmark_score from "${baseDir}/modules/mean_benchmark_score/main.nf" //TODO make it generic
+include pipeline from pipeline_module params(params)
+include benchmark from benchmark_module params(params)
 
+include mean_benchmark_score from "${baseDir}/modules/mean_benchmark_score/main.nf" //TODO make it generic
+//The previous include should be a module included in the benchmark pipeline
 
 // aligment BB11001
 // params.sequences = "${baseDir}/test/sequences/input/BB11001.fa"
@@ -132,7 +146,17 @@ workflow {
     pipeline()
     // pipeline() | view
     // println (pipeline.out)
-    // pipeline.out.view()
+    //pipeline.out.view()
+    // something like each pipeline.out ???
+    // OR
+
+    /*
+    len = pipeline.out.size()
+
+    log.info """
+    Length output... ${len}
+    """
+    */
 
     // I need to declare the output of the pipeline that the benchmark should use
     if (!params.skip_benchmark) {

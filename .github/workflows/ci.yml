@@ -85,5 +85,5 @@ jobs:
           sudo mv nextflow /usr/local/bin/
       - name: Runs tcoffee pipeline as an application script on test mode
         run: |
-          cd modules/pipelines/test_paired/tcoffee/
+          cd modules/pipelines/tcoffee/
           nextflow run . -profile test,docker

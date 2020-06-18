@@ -63,8 +63,9 @@ include {setBenchmark; set_input_param; setReference} from path_functions
 
 // Pipeline
 // Include the pipeline from the modules path if available
-path_to_pipelines =  "${projectDir}/modules/pipelines"
-pipeline_path = "${path_to_pipelines}/${params.pipeline}"
+// params.path_to_pipelines = "${projectDir}/modules/pipelines"
+// path_to_pipelines =  "${projectDir}/modules/pipelines"
+pipeline_path = "${params.path_to_pipelines}/${params.pipeline}"
 pipeline_module = file( "${pipeline_path}/main.nf" )
 if( !pipeline_module.exists() ) exit 1, "ERROR: The selected pipeline is not correctly included in nf-benchmark: ${params.pipeline}"
 
@@ -72,18 +73,16 @@ if( !pipeline_module.exists() ) exit 1, "ERROR: The selected pipeline is not cor
 if (workflow.profile == "test_nfb") {
   test_nfb_path = file ( params.test_nfb )
   if( !test_nfb_path.exists() ) exit 1, "ERROR: The selected pipeline \"${params.pipeline}\" needs a test configuration for nf-benchmark under ${pipeline_path}/conf/test_nfb.config or provided using \"--test_nfb\""
-   //under "${pipeline_path}/conf/test_nfb.config or provided using \"--test_nfb\""
-}
+} #del
 */
 test_config = file( "${pipeline_path}/conf/test_nfb.config" ) // TODO params!!!
-
-
 
 // Pipeline meta-information from the pipeline
 yamlPathPipeline = "${pipeline_path}/meta.yml" //TODO check if exists
 
 // Benchmark
-path_to_benchmarks =  "${projectDir}/modules/benchmarks"
+// path_to_benchmarks =  "${projectDir}/modules/benchmarks"
+// params.path_to_benchmarks = "${projectDir}/modules/benchmarks"
 
 csvPathMethods = "${baseDir}/assets/methods2benchmark.csv"
 csvPathBenchmarker = "${baseDir}/assets/dataFormat2benchmark.csv"
@@ -108,7 +107,7 @@ infoBenchmark = setBenchmark(yamlPathPipeline, csvPathMethods, params.pipeline)
 input_pipeline_param = set_input_param(yamlPathPipeline)
 
 if (!params.skip_benchmark) {
-  benchmark_path = "${path_to_benchmarks}/${infoBenchmark.benchmarker}"
+  benchmark_path = "${params.path_to_benchmarks}/${infoBenchmark.benchmarker}"
   benchmark_module = file( "${benchmark_path}/main.nf" )
   if( !benchmark_module.exists() ) exit 1, "ERROR: The selected benchmark is not correctly included in nf-benchmark: ${infoBenchmark.benchmarker}"
 

@@ -72,3 +72,10 @@ NXF_VER=20.04.1-edge nextflow run main.nf --regressive_align false --align_metho
 If you want to use the test_nfb you should include a configuration file in pipelines/your_pipeline/conf/test_nfb.config
 Otherwise, you can use your own test file using -c option see 
 
+### Params:
+
+--params.pipeline 
+
+--params.path_to_pipelines
+
+--params.path_to_benchmarks

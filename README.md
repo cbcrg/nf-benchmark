@@ -55,5 +55,20 @@ NXF_VER=20.04.1-edge nextflow run main.nf \
 NXF_VER=20.04.1-edge nextflow run main.nf --regressive_align false --align_methods "CLUSTALO" --evaluate false -profile test,docker -resume
 ```
 
-## Include yml file
+## Points to add to the documentation
+
+### Structure
+
+#### Modules/pipelines/
+
+### Modules/benchmarks
+
+### Modules/assests
+
+### Include yml file
+
+### Include a test config
+
+If you want to use the test_nfb you should include a configuration file in pipelines/your_pipeline/conf/test_nfb.config
+Otherwise, you can use your own test file using -c option see 
 

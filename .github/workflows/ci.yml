@@ -60,7 +60,7 @@ jobs:
         run: |
           nextflow run ${GITHUB_WORKSPACE} ${{matrix.paramPipeline}} -profile test,docker
 
-  Test t-coffee demo module
+  Test t-coffee demo module:
     env:
       NXF_VER: ${{ matrix.nxf_ver }}
       NXF_ANSI_LOG: false

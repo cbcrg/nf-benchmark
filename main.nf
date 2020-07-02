@@ -123,8 +123,8 @@ if (!params.skip_benchmark) {
 
 // Set input and reference data sets
 (input_data, ref_data) = setReference (infoBenchmark, csvPathBenchmarker, csvPathReference)
-//println (">>>>>>>>>>> $input_data\n")//#del
-//println (">>>>>>>>>>> $ref_data\n")//#del
+// log.info ">>>>>>>>>>> $input_data\n" //#del
+// log.info ">>>>>>>>>>> $ref_data\n" //#del
 
 params[input_pipeline_param] = input_data
 // params['reference'] = ref_data

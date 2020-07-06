@@ -7,9 +7,8 @@
 
 params.reference = ""
 
-include reformat as reformat_to_benchmark from "${moduleDir}/reformat.nf"
-include run_benchmark from "${moduleDir}/run_benchmark.nf"
-
+include reformat as reformat_to_benchmark from "${moduleDir}/modules/reformat.nf"
+include run_benchmark from "${moduleDir}/modules/run_benchmark.nf"
 
 // log.info ("$params.reference >>>>>>>>>>>>>>>>>") // #del
 // Set sequences channel
@@ -17,22 +16,20 @@ reference_ch = Channel.fromPath( params.reference, checkIfExists: true ).map { i
 
 // Run the workflow
 workflow benchmark {
-    //take:
     take:
       target_aln
     // result
     // result, path(ref)
 
     main:
+      target_aln
+        .cross ( reference_ch )
+        .map { it -> [ it[0][0], it[0][1], it[1][1] ] }
+        .set { target_and_ref }
 
-    target_aln
-      .cross ( reference_ch )
-      .map { it -> [ it[0][0], it[0][1], it[1][1] ] }
-      .set { target_and_ref }
-
-    reformat_to_benchmark (target_and_ref)  \
-      | run_benchmark
-    //run_benchmark (target_and_ref)
+      reformat_to_benchmark (target_and_ref)  \
+        | run_benchmark
+      //run_benchmark (target_and_ref)
 
     emit:
       run_benchmark.out

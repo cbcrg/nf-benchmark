@@ -38,6 +38,16 @@ NXF_VER=20.04.1-edge nextflow run main.nf \
     -profile test,docker \
     -resume
 ```
+* 2020/07/28 
+
+```bash
+NXF_VER=20.04.1-edge nextflow run main.nf \
+    --pipeline regressive_alignment_new  \
+    --regressive_align false \
+    --align_methods CLUSTALO \
+    --evaluate false \
+    -profile test,docker
+```
 
 #### Directly run regressive alignment pipeline
 

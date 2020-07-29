@@ -35,16 +35,34 @@ def readCsv (path) {
 }
 
 def set_input_param (path) {
+    bench_bool = 'input_nfb'
+
     def pipelineConfigYml = readYml (path)
 
-    input_param = pipelineConfigYml.input.input_param[0][0]
+    // Get all input parameters
+    map_input = pipelineConfigYml.input[0][0]
+    //log.info "1.......... ${pipelineConfigYml.input[0][0]['seqs'][bench_bool]}"
+    //log.info "2..........  ${pipelineConfigYml.input.seqs.edam_data[0][0]}"
+    //log.info "3.......... ${map_input['seqs'][bench_bool]} ......"
+    
+    map_input.each{ 
+        print it.key
+        if (map_input[it.key]['input_nfb']) {
+            input_param = it.key
+        }
+    }
 
+    // input_param = pipelineConfigYml.input.input_param[0][0]
+
+    /*
     log.info """
     INFO: This a message for testing purpose!
     INFO: Pipeline input parameter set to: $input_param
     """
     .stripIndent()
-
+    */ // #debug
+    
+    
     return input_param
 }
 
@@ -62,20 +80,29 @@ def set_input_param (path) {
  */
 // MAYBE ALIGNMENT SHOULD BE MODIFIED BY SOMETHING MORE GENERAL
 // benchmarkInfo currently is a CSV but could become a DBs or something else
-def setBenchmark (configYmlFile, benchmarkInfo, pipeline) {
+def setBenchmark (configYmlFile, benchmarkInfo, pipeline, input_field) {
 
     def fileYml = new File(configYmlFile)
-    def yaml = new Yaml()
+    def yaml = new Yaml() //TODO change to use function readYml
     def pipelineConfig = yaml.load(fileYml.text)
 
     topic = pipelineConfig.pipeline."$pipeline".edam_topic[0]
     operation = pipelineConfig.pipeline."$pipeline".edam_operation[0]
 
-    input_data = pipelineConfig.input.fasta.edam_data[0][0]
-    input_format = pipelineConfig.input.fasta.edam_format[0][0]
+    input_data = pipelineConfig.input."$input_field".edam_data[0][0] // TODO these are harcodes for the current example
+    input_format = pipelineConfig.input."$input_field".edam_format[0][0]
     output_data = pipelineConfig.output.alignment.edam_data[0][0]
     output_format = pipelineConfig.output.alignment.edam_format[0][0]
-
+    
+    log.info """
+    pipeline ........... $pipeline
+    topic .............. $topic
+    operation .......... $operation
+    input_data ......... $input_data
+    input_format ....... $input_format
+    output_data ........ $output_data
+    output_format ...... $output_format
+    """
     /*
     log.info """
     INFO: Selected pipeline name is: ${pipelineConfig.name}
@@ -120,6 +147,8 @@ def setBenchmark (configYmlFile, benchmarkInfo, pipeline) {
 /*
  * Functions returns the test and reference data to be used given a benchmarker
  */
+//csvPathBenchmarker = "${baseDir}/assets/dataFormat2benchmark.csv"
+//csvPathReference = "${baseDir}/assets/referenceData.csv"
 def setReference (benchmarkInfo, benchmarkerCsv, refDataCsv) {
 
     def dataFormat2benchmark = readCsv(benchmarkerCsv)
@@ -137,6 +166,7 @@ def setReference (benchmarkInfo, benchmarkerCsv, refDataCsv) {
                 refDataDict[ (i) ] = [ benchmarker: row.benchmarker,
                                         test_format: row.edam_test_format,
                                         ref_format : row.edam_ref_format ]
+             // log.info "benchmarker is $row.benchmarker ===========" // #debug
         }
     }
 
@@ -154,7 +184,7 @@ def setReference (benchmarkInfo, benchmarkerCsv, refDataCsv) {
 
     for( row in refData ) {
         if ( row.benchmarker == refDataHit.benchmarker) {
-            //log.info ( row.id + "===" + row.id + row.test_data_format + "===" + row.id +  row.ref_data_format ) //#del
+            // log.info ( row.id + "===" + row.id + row.test_data_format + "===" + row.id +  row.ref_data_format ) //#del
             id = row.id
             test_data_file = row.id + row.test_data_format
             ref_data_file = row.id + row.ref_data_format

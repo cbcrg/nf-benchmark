@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 2020 Centre for Genomic Regulation (CRG)
- * and the authors, Jose Espinosa-Carrasco, Paolo Di Tommaso§.
+ * and the authors, Jose Espinosa-Carrasco, Paolo Di Tommaso.
  *
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -41,6 +41,7 @@ log.info """\
 ===================================
 Pipeline: ${params.pipeline}
 """
+
 params.pipeline = ''
 projectDir = "${baseDir}"
 params.outdir = "${projectDir}/results"
@@ -50,7 +51,7 @@ params.skip_benchmark = false
 
 // Include config of the respective pipeline if the path exists
 /*
-module_config = "${projectDir}/modules/${params.pipeline}/nextflow.config"
+module_config = "${projectDir}/modules/pipelines/${params.pipeline}/nextflow.config"
 if ( file(module_config).exists() )
     includeConfig 'module_config'
 else
@@ -59,11 +60,11 @@ else
 
 // Include functions
 path_functions = "${projectDir}/modules/assets/functions.nf"
-include {setBenchmark; set_input_param; setReference} from path_functions
+include { setBenchmark; set_input_param; setReference } from path_functions
 
 // Pipeline
 // Include the pipeline from the modules path if available
-// params.path_to_pipelines = "${projectDir}/modules/pipelines"
+// params.path_to_pipelines = "${projectDir}/modules/pipelines" 
 // path_to_pipelines =  "${projectDir}/modules/pipelines"
 pipeline_path = "${params.path_to_pipelines}/${params.pipeline}"
 pipeline_module = file( "${pipeline_path}/main.nf" )
@@ -75,7 +76,9 @@ if (workflow.profile == "test_nfb") {
   if( !test_nfb_path.exists() ) exit 1, "ERROR: The selected pipeline \"${params.pipeline}\" needs a test configuration for nf-benchmark under ${pipeline_path}/conf/test_nfb.config or provided using \"--test_nfb\""
 } #del
 */
-test_config = file( "${pipeline_path}/conf/test_nfb.config" ) // TODO params!!!
+
+// Include pipeline test for nf-benchmark
+test_config = file( "${pipeline_path}/conf/test_nfb.config", checkIfExists: true ) // TODO params!!!
 
 // Pipeline meta-information from the pipeline
 yamlPathPipeline = "${pipeline_path}/meta.yml" //TODO check if exists
@@ -88,7 +91,13 @@ csvPathMethods = "${baseDir}/assets/methods2benchmark.csv"
 csvPathBenchmarker = "${baseDir}/assets/dataFormat2benchmark.csv"
 csvPathReference = "${baseDir}/assets/referenceData.csv"
 
-infoBenchmark = setBenchmark(yamlPathPipeline, csvPathMethods, params.pipeline)
+// set_input_param(yamlPathPipeline)
+// Dictionary?? 
+// Think on cases where it might be more than  one input (described on the YAML) //TODO
+input_pipeline_param = set_input_param(yamlPathPipeline)
+// log.info "Input pipeline param>>>>>>>>> $input_pipeline_param\n" //#del
+
+infoBenchmark = setBenchmark(yamlPathPipeline, csvPathMethods, params.pipeline, input_pipeline_param)
 // log.info (infoBenchmark) // [benchmarker:bali_score, operation:operation_0492, input_data:data_1233, input_format:format_1929, output_data:data_1384, output_format:format_1984]
 
 // ref_data = setReferenceOld (infoBenchmark, csvPathBenchmarker, csvPathReference) //#del
@@ -101,10 +110,7 @@ infoBenchmark = setBenchmark(yamlPathPipeline, csvPathMethods, params.pipeline)
  * Get name of the input parameter of pipeline
  */
 //include setReference from './resources/functions.nf'
-
-// input_params_name = 'sequences'
-// set_input_param(yamlPathPipeline)
-input_pipeline_param = set_input_param(yamlPathPipeline)
+// log.info "${params.skip_benchmark}" //del
 
 if (!params.skip_benchmark) {
   benchmark_path = "${params.path_to_benchmarks}/${infoBenchmark.benchmarker}"
@@ -115,20 +121,23 @@ if (!params.skip_benchmark) {
   yamlPathBenchmark = "${benchmark_path}/meta.yml"
   input_benchmark_param = set_input_param(yamlPathBenchmark)
 }
+else {
+    log.info "INFO: Skip benchmark set to true\n"
+}
 
-// println "$input_pipeline_param ...................test\n" //#del
 // Assign the input parameter
 // TODO Deal with test config test data TRY WITH EMPTY PARAM if param = "" set this one
 // if is set by test config do not reset?
 
 // Set input and reference data sets
 (input_data, ref_data) = setReference (infoBenchmark, csvPathBenchmarker, csvPathReference)
-// log.info ">>>>>>>>>>> $input_data\n" //#del
-// log.info ">>>>>>>>>>> $ref_data\n" //#del
+// log.info "Input data set to >>>>>>>>>>> $input_data\n" //#del
+// log.info "Ref data set to >>>>>>>>>>> $ref_data\n" //#del
+
 
 params[input_pipeline_param] = input_data
 // params['reference'] = ref_data
-params[input_benchmark_param] = ref_data
+// params[input_benchmark_param] = ref_data //commented
 
 // Hardcodes testing #del
 // params[input_pipeline_param] = "${baseDir}/reference_dataset/BB11001.fa" //#del
@@ -141,10 +150,10 @@ log.info """
         """.stripIndent()
 */
 
-include pipeline from pipeline_module params(params)
-include benchmark from benchmark_module params(params)
+include { pipeline } from pipeline_module params(params)
+// include { benchmark } from benchmark_module params(params) //commented fromPath error
 
-include mean_benchmark_score from "${baseDir}/modules/mean_benchmark_score/main.nf" //TODO make it generic
+include { mean_benchmark_score } from "${baseDir}/modules/mean_benchmark_score/main.nf" //TODO make it generic
 //The previous include should be a module included in the benchmark pipeline
 
 // aligment BB11001
@@ -171,6 +180,8 @@ workflow {
     */
 
     // I need to declare the output of the pipeline that the benchmark should use
+    
+    /* // commented it is called even if skip_benchmark is set to true reimplement
     if (!params.skip_benchmark) {
 
         log.info """
@@ -186,6 +197,7 @@ workflow {
         // TODO: output sometimes could be more than just a single score, refactor to be compatible with these cases
         mean_benchmark_score(scores) | view
     }
+    */
 }
 
 

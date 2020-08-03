@@ -42,21 +42,19 @@ log.info """\
 Pipeline: ${params.pipeline}
 """
 
-params.pipeline = ''
+////////////////////////////////////////////////////
+/* --          VALIDATE INPUTS                 -- */
+////////////////////////////////////////////////////
+
+pipeline_module = file( "${params.pipeline_path}/main.nf" )
+if( !pipeline_module.exists() ) exit 1, "ERROR: The selected pipeline is not correctly included in nf-benchmark: ${params.pipeline}"
+
+
 projectDir = "${baseDir}"
 params.outdir = "${projectDir}/results"
 // params.ref_data = ''
 // params.sequences = ''
 params.skip_benchmark = false
-
-// Include config of the respective pipeline if the path exists
-/*
-module_config = "${projectDir}/modules/pipelines/${params.pipeline}/nextflow.config"
-if ( file(module_config).exists() )
-    includeConfig 'module_config'
-else
-    log.info "There is no available config $module_config for pipeline module: $params.pipeline"
-*/
 
 // Include functions
 path_functions = "${projectDir}/modules/assets/functions.nf"
@@ -66,22 +64,15 @@ include { setBenchmark; set_input_param; setReference } from path_functions
 // Include the pipeline from the modules path if available
 // params.path_to_pipelines = "${projectDir}/modules/pipelines" 
 // path_to_pipelines =  "${projectDir}/modules/pipelines"
-pipeline_path = "${params.path_to_pipelines}/${params.pipeline}"
-pipeline_module = file( "${pipeline_path}/main.nf" )
-if( !pipeline_module.exists() ) exit 1, "ERROR: The selected pipeline is not correctly included in nf-benchmark: ${params.pipeline}"
 
-/*
-if (workflow.profile == "test_nfb") {
-  test_nfb_path = file ( params.test_nfb )
-  if( !test_nfb_path.exists() ) exit 1, "ERROR: The selected pipeline \"${params.pipeline}\" needs a test configuration for nf-benchmark under ${pipeline_path}/conf/test_nfb.config or provided using \"--test_nfb\""
-} #del
-*/
+// pipeline_path = "${params.path_to_pipelines}/${params.pipeline}"
+
 
 // Include pipeline test for nf-benchmark
-test_config = file( "${pipeline_path}/conf/test_nfb.config", checkIfExists: true ) // TODO params!!!
+test_config = file( "${params.pipeline_path}/conf/test_nfb.config", checkIfExists: true ) // TODO params!!!
 
 // Pipeline meta-information from the pipeline
-yamlPathPipeline = "${pipeline_path}/meta.yml" //TODO check if exists
+yamlPathPipeline = "${params.pipeline_path}/meta.yml" //TODO check if exists
 
 // Benchmark
 // path_to_benchmarks =  "${projectDir}/modules/benchmarks"
@@ -164,40 +155,50 @@ include { mean_benchmark_score } from "${baseDir}/modules/mean_benchmark_score/m
 // Run the workflow
 workflow {
 
+    // pipeline()
     pipeline()
-    // pipeline() | view
     // println (pipeline.out)
-    //pipeline.out.view()
+    // pipeline.out.alignment['progressive'].view()
+    //pipeline.out.alignment_prog.view()
+    //pipeline.out.alignment_reg.view()
+    //pipeline.out.alignment_slave.view()
+    pipeline.out.gap_prog.view()
+    log.info "====================== $pipeline.out.gap_prog"
+    //pipeline.out.view() //este
+
+    //pipeline.out.result.view()
+
+    //pipeline.out.alignment.view()
     // something like each pipeline.out ???
     // OR
 
-    /*
+
     len = pipeline.out.size()
 
     log.info """
     Length output... ${len}
     """
-    */
+
 
     // I need to declare the output of the pipeline that the benchmark should use
     
-    /* // commented it is called even if skip_benchmark is set to true reimplement
+    // commented it is called even if skip_benchmark is set to true reimplement
     if (!params.skip_benchmark) {
 
         log.info """
         Benchmark: ${infoBenchmark.benchmarker}
         """
 
-        benchmark (pipeline.out) //TODO reference should be a param
-        //benchmark(pipeline['alignmentFile'])
-        benchmark.out \
-            | map { it.text } \
-            | collectFile (name: 'scores.csv', newLine: false) \
-            | set { scores }
-        // TODO: output sometimes could be more than just a single score, refactor to be compatible with these cases
-        mean_benchmark_score(scores) | view
+        // benchmark (pipeline.out) //TODO reference should be a param
+        // //benchmark(pipeline['alignmentFile'])
+        // benchmark.out \
+        //     | map { it.text } \
+        //     | collectFile (name: 'scores.csv', newLine: false) \
+        //     | set { scores }
+        // // TODO: output sometimes could be more than just a single score, refactor to be compatible with these cases
+        // mean_benchmark_score(scores) | view
     }
-    */
+
 }
 
 

@@ -13,14 +13,15 @@ pipeline:
         edam_operation: operation_0492
 input:
     -
-        - input_param: reference
-        - fasta:
+        # - input_param: reference
+        - reference:
             type: path
             edam_data: data_1233
             edam_format: format_1929
             format: fasta
             description: Input fasta file with a set of alignments
             pattern: '*.{fasta,fa,tfa}'
+            input_nfb: true
 output:
     -
         - alignment:

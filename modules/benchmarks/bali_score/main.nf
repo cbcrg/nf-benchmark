@@ -7,10 +7,10 @@
 
 params.reference = ""
 
-include reformat as reformat_to_benchmark from "${moduleDir}/modules/reformat.nf"
-include run_benchmark from "${moduleDir}/modules/run_benchmark.nf"
+include { reformat as reformat_to_benchmark }  from "${moduleDir}/modules/reformat.nf"
+include { run_benchmark } from "${moduleDir}/modules/run_benchmark.nf"
 
-// log.info ("$params.reference >>>>>>>>>>>>>>>>>") // #del
+log.info ("$params.reference >>>>>>>>>>>>>>>>>") // #del //THIS IS MISSING!!!!
 // Set sequences channel
 reference_ch = Channel.fromPath( params.reference, checkIfExists: true ).map { item -> [ item.baseName, item ] }
 

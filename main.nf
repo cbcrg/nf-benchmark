@@ -125,10 +125,10 @@ else {
 // log.info "Input data set to >>>>>>>>>>> $input_data\n" //#del
 // log.info "Ref data set to >>>>>>>>>>> $ref_data\n" //#del
 
-
 params[input_pipeline_param] = input_data
 // params['reference'] = ref_data
-// params[input_benchmark_param] = ref_data //commented
+log.info ".................................Input benchmark param >>>>>>>>>>> $input_benchmark_param\n" //#del
+params[input_benchmark_param] = ref_data //commented
 
 // Hardcodes testing #del
 // params[input_pipeline_param] = "${baseDir}/reference_dataset/BB11001.fa" //#del
@@ -142,7 +142,7 @@ log.info """
 */
 
 include { pipeline } from pipeline_module params(params)
-// include { benchmark } from benchmark_module params(params) //commented fromPath error
+include { benchmark } from benchmark_module params(params) //commented fromPath error because is not receiving the references sequences
 
 include { mean_benchmark_score } from "${baseDir}/modules/mean_benchmark_score/main.nf" //TODO make it generic
 //The previous include should be a module included in the benchmark pipeline
@@ -155,30 +155,14 @@ include { mean_benchmark_score } from "${baseDir}/modules/mean_benchmark_score/m
 // Run the workflow
 workflow {
 
-    // pipeline()
     pipeline()
-    // println (pipeline.out)
-    // pipeline.out.alignment['progressive'].view()
-    //pipeline.out.alignment_prog.view()
-    //pipeline.out.alignment_reg.view()
-    //pipeline.out.alignment_slave.view()
-    pipeline.out.gap_prog.view()
-    log.info "====================== $pipeline.out.gap_prog"
-    //pipeline.out.view() //este
-
-    //pipeline.out.result.view()
-
-    //pipeline.out.alignment.view()
-    // something like each pipeline.out ???
-    // OR
-
+    pipeline.out.alignment_regressive.view()
 
     len = pipeline.out.size()
 
     log.info """
-    Length output... ${len}
-    """
-
+    Length output... ${len}\n
+    """.stripIndent()
 
     // I need to declare the output of the pipeline that the benchmark should use
     
@@ -187,16 +171,18 @@ workflow {
 
         log.info """
         Benchmark: ${infoBenchmark.benchmarker}
-        """
+        """.stripIndent()
+
+        benchmark (pipeline.out.alignment_regressive)
 
         // benchmark (pipeline.out) //TODO reference should be a param
         // //benchmark(pipeline['alignmentFile'])
-        // benchmark.out \
-        //     | map { it.text } \
-        //     | collectFile (name: 'scores.csv', newLine: false) \
-        //     | set { scores }
+        benchmark.out \
+             | map { it.text } \
+             | collectFile (name: 'scores.csv', newLine: false) \
+             | set { scores }
         // // TODO: output sometimes could be more than just a single score, refactor to be compatible with these cases
-        // mean_benchmark_score(scores) | view
+        mean_benchmark_score(scores) | view
     }
 
 }

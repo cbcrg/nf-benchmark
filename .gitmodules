@@ -1,3 +1,0 @@
-[submodule "modules/regressive_alignment"]
-	path = modules/regressive_alignment
-	url = https://github.com/JoseEspinosa/regressive_alignment.git

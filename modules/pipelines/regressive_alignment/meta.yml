@@ -1,0 +1,45 @@
+name: regressive_alignment
+description: Run regressive sequence alignment
+keywords:
+    - MSA
+    - multiple sequence aligment
+    - regressive alignment
+pipeline:
+    - regressive_alignment:
+        description: |
+            Regressive alignment TODO.
+        homepage:
+        documentation: TODO
+        edam_topic: topic_0091
+        edam_operation: operation_0492
+
+input:
+    -
+        - seqs: # this should be the name of the param or channel
+            type: path
+            edam_data: data_1233
+            edam_format: format_1929
+            format: fasta
+            description: Input fasta file with a set of sequences to be aligned
+            pattern: '*.{fasta,fa,tfa}'
+            input_nfb: true # might be rethink
+        - refs:
+            type: path
+            edam_data: data_1233 #
+            edam_format: format_1929 #
+            format: fasta
+            description: Input fasta file with a set of alignments
+            pattern: '*.{fasta,fa,tfa}'
+            reference: true
+            default: false # if set to true the info should be read from here
+output:
+    -
+        - alignment:
+            type: file
+            edam_data: data_1384
+            edam_format: format_1984
+            format: fasta_alignment
+            description: fasta alignment file
+            pattern: '*.{fasta,fa,tfa}'
+authors:
+    - '@edgano, @JoseEspinosa'

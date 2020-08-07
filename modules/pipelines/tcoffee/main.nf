@@ -9,26 +9,33 @@ nextflow.preview.dsl=2
  */
 
 // input sequences to align in fasta format
-// params.sequences = "${projectDir}/test/sequences/BB11001.fa"
+params.sequences = "${projectDir}/test/sequences/BB11001.fa"
 params.outdir = './results'
+
+log.info """\
+         PIPELINE  ~  version 0.1"
+         ======================================="
+         Input sequences (FASTA)                        : ${params.sequences}
+         """
+         .stripIndent()
 
 // Set sequences channel
 sequences_ch = Channel.fromPath( params.sequences, checkIfExists: true ).map { item -> [ item.baseName, item ] }
-include align from "${moduleDir}/modules/align.nf"
-// include reformat from "${baseDir}/modules/tcoffee/reformat.nf"
+
+include { align } from "${moduleDir}/modules/align.nf"
+// include { reformat } from "${baseDir}/modules/tcoffee/reformat.nf"
 
 // Run the workflow
 workflow pipeline {
     main:
     // Channel.from(params.ref_data) \
-    //align (params.ref_data) \
+    // align (params.ref_data) \
 
-      align (sequences_ch) //\
+    align (sequences_ch) //\
     //  | reformat
 
     emit:
-      // reformat.out
-      align.out
+    alignment = align.out
 }
 
 workflow {

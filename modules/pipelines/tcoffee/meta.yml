@@ -17,14 +17,14 @@ pipeline:
         edam_operation: operation_0492
 input:
     -
-        - input_param: sequences
-        - fasta: # this could be substitute by input_param
+        - sequences: # this could be substitute by input_param
             type: path
             edam_data: data_1233
             edam_format: format_1929
             format: fasta
             description: Input fasta file with a set of alignments
             pattern: '*.{fasta,fa,tfa}'
+            input_nfb: true
 output:
     -
         - output_param: '--input' # TODO remove or redesign if needed

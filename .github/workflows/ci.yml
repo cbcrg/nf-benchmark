@@ -30,7 +30,7 @@ jobs:
           sudo mv nextflow /usr/local/bin/
       - name: Run pipeline as a demo with tcoffee as the pipeline and balibase as the benchmarker
         run: |
-          nextflow run ${GITHUB_WORKSPACE} ${{matrix.paramPipeline}}
+          nextflow run ${GITHUB_WORKSPACE} ${{matrix.paramPipeline}} -profile test_nfb,docker
 
   test_regressive_alignment:
     env:

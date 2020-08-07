@@ -103,6 +103,8 @@ infoBenchmark = setBenchmark(yamlPathPipeline, csvPathMethods, params.pipeline, 
 //include setReference from './resources/functions.nf'
 // log.info "${params.skip_benchmark}" //del
 
+benchmark_module = ""
+
 if (!params.skip_benchmark) {
   benchmark_path = "${params.path_to_benchmarks}/${infoBenchmark.benchmarker}"
   benchmark_module = file( "${benchmark_path}/main.nf" )
@@ -121,14 +123,15 @@ else {
 // if is set by test config do not reset?
 
 // Set input and reference data sets
+// TODO: Separate in two functions so that the reference is not set if skip_benchmark para is set?
 (input_data, ref_data) = setReference (infoBenchmark, csvPathBenchmarker, csvPathReference)
 // log.info "Input data set to >>>>>>>>>>> $input_data\n" //#del
 // log.info "Ref data set to >>>>>>>>>>> $ref_data\n" //#del
 
 params[input_pipeline_param] = input_data
-// params['reference'] = ref_data
-log.info ".................................Input benchmark param >>>>>>>>>>> $input_benchmark_param\n" //#del
-params[input_benchmark_param] = ref_data //commented
+if (!params.skip_benchmark) {
+    params[input_benchmark_param] = ref_data
+}
 
 // Hardcodes testing #del
 // params[input_pipeline_param] = "${baseDir}/reference_dataset/BB11001.fa" //#del
@@ -142,8 +145,9 @@ log.info """
 */
 
 include { pipeline } from pipeline_module params(params)
-include { benchmark } from benchmark_module params(params) //commented fromPath error because is not receiving the references sequences
-
+if (!params.skip_benchmark) {
+    include { benchmark } from benchmark_module params(params) //commented fromPath error because is not receiving the references sequences
+}
 include { mean_benchmark_score } from "${baseDir}/modules/mean_benchmark_score/main.nf" //TODO make it generic
 //The previous include should be a module included in the benchmark pipeline
 
@@ -156,8 +160,8 @@ include { mean_benchmark_score } from "${baseDir}/modules/mean_benchmark_score/m
 workflow {
 
     pipeline()
-    pipeline.out.alignment_regressive.view()
-
+    // pipeline.out.alignment_regressive.view()
+    // pipeline.out['alignment_regressive'].view()
     len = pipeline.out.size()
 
     log.info """

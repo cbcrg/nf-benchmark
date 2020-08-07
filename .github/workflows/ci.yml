@@ -4,7 +4,7 @@ name: nf-benchmark CI
 on: [push, pull_request]
 
 jobs:
-  test_demo:
+  test_tcoffee_demo:
     env:
       NXF_VER: ${{ matrix.nxf_ver }}
       NXF_ANSI_LOG: false
@@ -13,7 +13,7 @@ jobs:
     strategy:
       matrix:
         # Nextflow versions: check pipeline minimum and current latest
-        nxf_ver: ['20.04.1-edge']
+        nxf_ver: ['20.07.1']
         paramPipeline: [--pipeline tcoffee]
     steps:
       # Check out the repository
@@ -41,8 +41,8 @@ jobs:
     strategy:
       matrix:
         # Nextflow versions: check pipeline minimum and current latest
-        nxf_ver: ['20.04.1-edge']
-        paramPipeline: ['--pipeline regressive_alignment --regressive_align true --align_methods CLUSTALO --skip_benchmark']
+        nxf_ver: ['20.07.1']
+        paramPipeline: ['--pipeline regressive_alignment --skip_benchmark']
     steps:
       # Check out the repository
       - uses: actions/checkout@v2
@@ -58,32 +58,4 @@ jobs:
           sudo mv nextflow /usr/local/bin/
       - name: Runs regressive_alignment pipeline on test mode
         run: |
-          nextflow run ${GITHUB_WORKSPACE} ${{matrix.paramPipeline}} -profile test,docker
-
-  test_tcoffee_demo_module:
-    env:
-      NXF_VER: ${{ matrix.nxf_ver }}
-      NXF_ANSI_LOG: false
-    runs-on: ubuntu-latest
-    if: "!contains(github.event.head_commit.message, '[ci skip]')"
-    strategy:
-        matrix:
-          # Nextflow versions: check pipeline minimum and current latest
-          nxf_ver: ['20.04.1-edge']
-    steps:
-      # Check out the repository
-      - uses: actions/checkout@v2
-      - name: Checkout submodules
-        shell: bash
-        run: |
-          auth_header="$(git config --local --get http.https://github.com/.extraheader)"
-          git submodule sync --recursive
-          git -c "http.extraheader=$auth_header" -c protocol.version=2 submodule update --init --force --recursive --depth=1
-      - name: Install Nextflow
-        run: |
-          wget -qO- get.nextflow.io | bash
-          sudo mv nextflow /usr/local/bin/
-      - name: Runs tcoffee pipeline as an application script on test mode
-        run: |
-          cd modules/pipelines/tcoffee/
-          nextflow run . -profile test,docker
+          nextflow run ${GITHUB_WORKSPACE} ${{matrix.paramPipeline}} -profile test_nfb,docker

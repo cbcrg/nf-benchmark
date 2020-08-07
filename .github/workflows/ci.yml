@@ -14,7 +14,7 @@ jobs:
       matrix:
         # Nextflow versions: check pipeline minimum and current latest
         nxf_ver: ['20.07.1']
-        paramPipeline: [--pipeline tcoffee]
+        paramPipeline: ['--pipeline tcoffee --skip_benchmark']
     steps:
       # Check out the repository
       - uses: actions/checkout@v2

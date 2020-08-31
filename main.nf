@@ -155,13 +155,17 @@ include { mean_benchmark_score } from "${baseDir}/modules/mean_benchmark_score/m
 // params.sequences = "${baseDir}/test/sequences/input/BB11001.fa"
 // params.reference = "${baseDir}/test/sequences/reference/BB11001.xml.ref"
 // benchmarker = "bali_base"
+output_name = 'alignment_regressive'
 
 // Run the workflow
 workflow {
 
     pipeline()
-    // pipeline.out.alignment_regressive.view()
-    // pipeline.out['alignment_regressive'].view()
+    //pipeline.out.alignment_regressive.view() //WORKS
+    pipeline.out."$output_name".view()
+
+    //pipeline.out['alignment_regressive'].view()
+    //pipeline.out.view()
     len = pipeline.out.size()
 
     log.info """

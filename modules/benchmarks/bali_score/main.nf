@@ -14,6 +14,8 @@ log.info ("$params.reference >>>>>>>>>>>>>>>>>") // #del //THIS IS MISSING!!!!
 // Set sequences channel
 reference_ch = Channel.fromPath( params.reference, checkIfExists: true ).map { item -> [ item.baseName, item ] }
 
+reference_ch.view() // #del
+
 // Run the workflow
 workflow benchmark {
     take:
@@ -24,6 +26,7 @@ workflow benchmark {
     main:
       target_aln
         .cross ( reference_ch )
+        .ifEmpty { error "Cannot find any reference matching alignment for benchmarking"  }
         .map { it -> [ it[0][0], it[0][1], it[1][1] ] }
         .set { target_and_ref }
 

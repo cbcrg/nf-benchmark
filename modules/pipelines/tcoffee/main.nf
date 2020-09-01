@@ -35,6 +35,7 @@ workflow pipeline {
     //  | reformat
 
     emit:
+    // align.out
     alignment = align.out
 }
 

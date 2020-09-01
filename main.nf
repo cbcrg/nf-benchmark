@@ -49,7 +49,6 @@ Pipeline: ${params.pipeline}
 pipeline_module = file( "${params.pipeline_path}/main.nf" )
 if( !pipeline_module.exists() ) exit 1, "ERROR: The selected pipeline is not correctly included in nf-benchmark: ${params.pipeline}"
 
-
 projectDir = "${baseDir}"
 params.outdir = "${projectDir}/results"
 // params.ref_data = ''
@@ -133,9 +132,10 @@ if (!params.skip_benchmark) {
     params[input_benchmark_param] = ref_data
 }
 
-// Hardcodes testing #del
-// params[input_pipeline_param] = "${baseDir}/reference_dataset/BB11001.fa" //#del
-// params['reference'] = "${baseDir}/reference_dataset/BB11001.xml" //#del
+// Hardcodes testing - aligment BB11001 // #del
+// params[input_pipeline_param] = "${baseDir}/reference_dataset/BB11001.fa" // #del
+// params['reference'] = "${baseDir}/reference_dataset/BB11001.xml" // #del
+// benchmarker = "bali_base" // #del
 
 /*
 log.info """
@@ -151,22 +151,48 @@ if (!params.skip_benchmark) {
 include { mean_benchmark_score } from "${baseDir}/modules/mean_benchmark_score/main.nf" //TODO make it generic
 //The previous include should be a module included in the benchmark pipeline
 
-// aligment BB11001
-// params.sequences = "${baseDir}/test/sequences/input/BB11001.fa"
-// params.reference = "${baseDir}/test/sequences/reference/BB11001.xml.ref"
-// benchmarker = "bali_base"
-output_name = 'alignment_regressive'
+/*
+if (!params.skip_benchmark) {
+    params[input_benchmark_param] = ref_data
+}
+*/
+
+/*
+ * COMMANDS
+ * nextflow run main.nf --pipeline tcoffee --skip_benchmark -profile docker,test_nfb -ansi-log false -resume
+ * nextflow run main.nf --pipeline tcoffee --pipeline_output_name 'alignment' --skip_benchmark -profile docker,test_nfb -ansi-log false -resume
+ * make regressive | nextflow run  main.nf --pipeline regressive_alignment --skip_benchmark -profile docker,test_nfb -ansi-log false -resume
+ * make regressive | nextflow run  main.nf --pipeline regressive_alignment --pipeline_output_name 'alignment_regressive' --skip_benchmark -profile docker,test_nfb -ansi-log false -resume
+ * COMMANDS WITH BENCHMARK
+ * nextflow run main.nf --pipeline tcoffee -profile docker,test_nfb -ansi-log false -resume
+ * nextflow run main.nf --pipeline tcoffee --pipeline_output_name 'alignment' --skip_benchmark -profile docker,test_nfb -ansi-log false -resume
+ * make regressive | nextflow run  main.nf --pipeline regressive_alignment --skip_benchmark -profile docker,test_nfb -ansi-log false -resume
+ * make regressive | nextflow run  main.nf --pipeline regressive_alignment --pipeline_output_name 'alignment_regressive' --skip_benchmark -profile docker,test_nfb -ansi-log false -resume
+ */
+
+params.pipeline_output_name = false
+//params.pipeline_output_name = 'alignment_regressive'
 
 // Run the workflow
 workflow {
 
     pipeline()
-    //pipeline.out.alignment_regressive.view() //WORKS
-    pipeline.out."$output_name".view()
 
-    //pipeline.out['alignment_regressive'].view()
-    //pipeline.out.view()
+    // By default take ".out" if provided (or exists) then used the named output
+    if (!params.pipeline_output_name) {
+        output_to_benchmark = pipeline.out[0]
+    }
+    else {
+        output_to_benchmark = pipeline.out."$params.pipeline_output_name"
+    }
+
+    // pipeline.out.alignment_regressive.view() //WORKS
+    // pipeline.out."$output_name".view() //WORKS
+    // pipeline.out.view() //WORKS
+
+    output_to_benchmark.view()
     len = pipeline.out.size()
+    // len = output_to_benchmark.size() // Does not work
 
     log.info """
     Length output... ${len}\n
@@ -181,10 +207,12 @@ workflow {
         Benchmark: ${infoBenchmark.benchmarker}
         """.stripIndent()
 
-        benchmark (pipeline.out.alignment_regressive)
+        // benchmark (pipeline.out.alignment_regressive) // HERE USING NAMED OUTPUT
+        benchmark (output_to_benchmark)
 
         // benchmark (pipeline.out) //TODO reference should be a param
         // //benchmark(pipeline['alignmentFile'])
+
         benchmark.out \
              | map { it.text } \
              | collectFile (name: 'scores.csv', newLine: false) \

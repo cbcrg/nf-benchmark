@@ -29,6 +29,16 @@ NXF_VER=20.04.1-edge nextflow run main.nf \
 
 ### From a module
 
+#### t-coffee
+
+```bash
+nextflow run main.nf --pipeline tcoffee --skip_benchmark -resume
+```
+
+```bash
+nextflow run main.nf --pipeline tcoffee --skip_benchmark -profile docker,test_nfb -ansi-log false -resume
+```
+
 #### Regressive-alignment
 
 ```bash
@@ -38,6 +48,7 @@ NXF_VER=20.04.1-edge nextflow run main.nf \
     -profile test,docker \
     -resume
 ```
+
 * 2020/07/28 
 
 ```bash
@@ -58,6 +69,18 @@ NXF_VER=20.04.1-edge nextflow run main.nf \
     -profile test,docker \
     -resume
 ```
+
+#### With makefile
+
+```bash
+make regressive | nextflow run main.nf \
+    --pipeline regressive_alignment \
+    --skip_benchmark \
+    -profile docker,test_nfb \
+    -ansi-log false \
+    -resume
+```
+
 
 ## declare workflow on main as pipeline  
 

@@ -82,7 +82,7 @@ csvPathBenchmarker = "${baseDir}/assets/dataFormat2benchmark.csv"
 csvPathReference = "${baseDir}/assets/referenceData.csv"
 
 // set_input_param(yamlPathPipeline)
-// Dictionary?? 
+// Dictionary?? //TODO
 // Think on cases where it might be more than  one input (described on the YAML) //TODO
 input_pipeline_param = set_input_param(yamlPathPipeline)
 // log.info "Input pipeline param>>>>>>>>> $input_pipeline_param\n" //#del
@@ -123,11 +123,13 @@ else {
 
 // Set input and reference data sets
 // TODO: Separate in two functions so that the reference is not set if skip_benchmark para is set?
+// TODO: In any case is a good idea to keep it separated to avoid problems when modifying one or the other // #del
 (input_data, ref_data) = setReference (infoBenchmark, csvPathBenchmarker, csvPathReference)
-// log.info "Input data set to >>>>>>>>>>> $input_data\n" //#del
-// log.info "Ref data set to >>>>>>>>>>> $ref_data\n" //#del
+log.info "********* Input data set to >>>>>>>>>>> $input_data\n" //#del
+log.info "********* Ref data set to >>>>>>>>>>> $ref_data\n" //#del
 
 params[input_pipeline_param] = input_data
+
 if (!params.skip_benchmark) {
     params[input_benchmark_param] = ref_data
 }
@@ -137,25 +139,21 @@ if (!params.skip_benchmark) {
 // params['reference'] = "${baseDir}/reference_dataset/BB11001.xml" // #del
 // benchmarker = "bali_base" // #del
 
-/*
 log.info """
-        Info: see here
-        ${params.sequences}
+        ************************
+        pipeline input name:
+        ${input_pipeline_param}\n
+        benchmark input name:
+        ${input_benchmark_param}\n
+        ************************
         """.stripIndent()
-*/
 
 include { pipeline } from pipeline_module params(params)
 if (!params.skip_benchmark) {
-    include { benchmark } from benchmark_module params(params) //commented fromPath error because is not receiving the references sequences
+    include { benchmark } from benchmark_module params(params)
 }
 include { mean_benchmark_score } from "${baseDir}/modules/mean_benchmark_score/main.nf" //TODO make it generic
 //The previous include should be a module included in the benchmark pipeline
-
-/*
-if (!params.skip_benchmark) {
-    params[input_benchmark_param] = ref_data
-}
-*/
 
 /*
  * COMMANDS
@@ -209,15 +207,13 @@ workflow {
 
         // benchmark (pipeline.out.alignment_regressive) // HERE USING NAMED OUTPUT
         benchmark (output_to_benchmark)
-
         // benchmark (pipeline.out) //TODO reference should be a param
-        // //benchmark(pipeline['alignmentFile'])
 
         benchmark.out \
              | map { it.text } \
              | collectFile (name: 'scores.csv', newLine: false) \
              | set { scores }
-        // // TODO: output sometimes could be more than just a single score, refactor to be compatible with these cases
+        // TODO: output sometimes could be more than just a single score, refactor to be compatible with these cases
         mean_benchmark_score(scores) | view
     }
 

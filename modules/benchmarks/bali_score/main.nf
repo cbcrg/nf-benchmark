@@ -25,9 +25,8 @@ workflow benchmark {
 
     main:
       target_aln
-        .cross ( reference_ch )
-        .ifEmpty { error "Cannot find any reference matching alignment for benchmarking"  }
-        .map { it -> [ it[0][0], it[0][1], it[1][1] ] }
+        .join ( reference_ch, by: [0] )
+        .ifEmpty { error "Cannot find any reference matching alignment for benchmarking" }
         .set { target_and_ref }
 
       reformat_to_benchmark (target_and_ref)  \

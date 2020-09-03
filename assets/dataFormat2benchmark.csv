@@ -1,2 +1,2 @@
-edam_operation,edam_test_data,edam_test_format,edam_ref_data,edam_ref_format,benchmarker
-operation_0259,data_1233,format_1929,data_1384,format_1984,bali_score
+benchmarker,edam_operation,edam_test_data,edam_test_format,edam_ref_data,edam_ref_format
+bali_score,operation_0259,data_1233,format_1929,data_1384,format_1984

@@ -34,7 +34,7 @@ def readCsv (path) {
     return content
 }
 
-def set_input_param (path) {
+def setInputParam (path) {
     bench_bool = 'input_nfb'
 
     def pipelineConfigYml = readYml (path)
@@ -44,25 +44,16 @@ def set_input_param (path) {
     //log.info "1.......... ${pipelineConfigYml.input[0][0]['seqs'][bench_bool]}"
     //log.info "2..........  ${pipelineConfigYml.input.seqs.edam_data[0][0]}"
     //log.info "3.......... ${map_input['seqs'][bench_bool]} ......"
-    
-    map_input.each{ 
-        print it.key
+
+    // Checks whether yml has the input_nfb field check to true (input nf-benchmark)
+    map_input.each{
+        // log.info "key_________: ${it.key}" // #del
         if (map_input[it.key]['input_nfb']) {
             input_param = it.key
         }
     }
-
     // input_param = pipelineConfigYml.input.input_param[0][0]
 
-    /*
-    log.info """
-    INFO: This a message for testing purpose!
-    INFO: Pipeline input parameter set to: $input_param
-    """
-    .stripIndent()
-    */ // #debug
-    
-    
     return input_param
 }
 
@@ -89,11 +80,12 @@ def setBenchmark (configYmlFile, benchmarkInfo, pipeline, input_field) {
     topic = pipelineConfig.pipeline."$pipeline".edam_topic[0]
     operation = pipelineConfig.pipeline."$pipeline".edam_operation[0]
 
-    input_data = pipelineConfig.input."$input_field".edam_data[0][0] // TODO these are harcodes for the current example
+    input_data = pipelineConfig.input."$input_field".edam_data[0][0] // TODO these are hardcodes for the current example
     input_format = pipelineConfig.input."$input_field".edam_format[0][0]
     output_data = pipelineConfig.output.alignment.edam_data[0][0]
     output_format = pipelineConfig.output.alignment.edam_format[0][0]
-    
+
+    /*
     log.info """
     INFO: pipeline ........... $pipeline
     INFO: topic .............. $topic
@@ -103,7 +95,7 @@ def setBenchmark (configYmlFile, benchmarkInfo, pipeline, input_field) {
     INFO: output_data ........ $output_data
     INFO: output_format ...... $output_format
     """
-
+    */
     def csvBenchmark = readCsv (benchmarkInfo)
     def benchmarkDict = [:]
     def i = 0
@@ -122,23 +114,20 @@ def setBenchmark (configYmlFile, benchmarkInfo, pipeline, input_field) {
                                                                  output_format: row.edam_output_format ]
         }
     }
-    // log.info "benchmarkDict[1]" //#del
+
     higher_priority = benchmarkDict.keySet().min()
 
-    log.info """
-    **************
-    Test of min priority $higher_priority
-    """
-
     if ( benchmarkDict.size() == 0 ) exit 1, "Error: No available benchmark for the selected pipeline  \"${params.pipeline}\" is not included in nf-benchmark"
-    if ( benchmarkDict.size() > 1 ) {
 
-        log.info """"
-        More than one possible benchmarker for \"${params.pipeline}\" pipeline, the benchmarker with the higher priority has been set"
-        """
+    if ( benchmarkDict.size() > 1 ) {
+        log.info """
+        More than one possible benchmarker for \"${params.pipeline}\" pipeline benchmarker set to \"${benchmarkDict[higher_priority].benchmarker}\" (higher priority)
+        """.stripIndent()
+        benchmarkDict = benchmarkDict [ higher_priority ]
     }
 
-    return benchmarkDict [ higher_priority ]
+    // return benchmarkDict [ higher_priority ]
+    return benchmarkDict
 }
 
 /*
@@ -146,7 +135,7 @@ def setBenchmark (configYmlFile, benchmarkInfo, pipeline, input_field) {
  */
 //csvPathBenchmarker = "${baseDir}/assets/dataFormat2benchmark.csv"
 //csvPathReference = "${baseDir}/assets/referenceData.csv"
-def setReference (benchmarkInfo, benchmarkerCsv, refDataCsv) {
+def setReferenceOld (benchmarkInfo, benchmarkerCsv, refDataCsv) {
 
     def dataFormat2benchmark = readCsv(benchmarkerCsv)
     def refData = readCsv(refDataCsv)
@@ -163,6 +152,7 @@ def setReference (benchmarkInfo, benchmarkerCsv, refDataCsv) {
                 refDataDict[ (i) ] = [ benchmarker: row.benchmarker,
                                         test_format: row.edam_test_format,
                                         ref_format : row.edam_ref_format ]
+             // log.info "benchmarker is $row.benchmarker ===========" // #debug
         }
     }
 
@@ -172,40 +162,65 @@ def setReference (benchmarkInfo, benchmarkerCsv, refDataCsv) {
     if ( refDataDict.size() > 1 ) exit 1, "Error: More than one possible benchmarker please refine pipeline description for \"${params.pipeline}\" pipeline"
     if ( refDataDict.size() == 0 ) exit 1, "Error: The selected pipeline  \"${params.pipeline}\" is not included in nf-benchmark"
 
-    refDataHit = refDataDict[ 1 ]
+    refDataHit = refDataDict [ 1 ]
 
-    def refList = []
+    // def refList = []
+    def pipelineInputList = []
+    def refBenchmarkerList = []
 
     for( row in refData ) {
         if ( row.benchmarker == refDataHit.benchmarker) {
-            //log.info ( row.id + "===" + row.id + row.test_data_format + "===" + row.id +  row.ref_data_format ) //#del
             id = row.id
             test_data_file = row.id + row.test_data_format
             ref_data_file = row.id + row.ref_data_format
-            refList.add(  [ id, test_data_file, ref_data_file ] )
+
+            pipelineInputList.add ("${baseDir}/reference_dataset/" + test_data_file)
+            refBenchmarkerList.add ("${baseDir}/reference_dataset/" + ref_data_file)
+            // refList.add(  [ id, test_data_file, ref_data_file ] )
         }
     }
 
-    Channel
-        .fromPath( refDataCsv )
-        .splitCsv(header: true)
-        .filter { row ->
-            row.benchmarker == refDataHit.benchmarker
+    return [ pipelineInputList, refBenchmarkerList ]
+}
+
+/*
+ * Functions returns the test and reference data to be used given a benchmarker
+ */
+//csvPathBenchmarker = "${baseDir}/assets/dataFormat2benchmark.csv"
+//csvPathReference = "${baseDir}/assets/referenceData.csv"
+/*
+ * benchmarkInfo =
+ */
+def getData (benchmarkInfo, refDataCsv, skipReference) {
+
+    def refData = readCsv(refDataCsv)
+
+    def i = 0
+    def refDataDict = [:]
+    def dataIds  = []
+    def pipelineInputList  = []
+    def refBenchmarkerList  = []
+
+    for ( row in refData ) {
+        if ( row.benchmarker == benchmarkInfo.benchmarker &&
+             row.pipeline_input_format == benchmarkInfo.input_format  &&
+             row.benchmark_ref_format  == benchmarkInfo.output_format ) {
+
+             id = row.id
+             pipeline_input_file = id + row.test_data_format
+             ref_file  = id + row.ref_data_format
+
+             pipelineInputList.add ("${baseDir}/reference_dataset/" + pipeline_input_file)
+             refBenchmarkerList.add ("${baseDir}/reference_dataset/" + ref_file)
+
+             dataIds.add ( id )
         }
-        .map { [ it.id, //it.edam_test_data,
-                 file("${baseDir}/reference_dataset/" + it.id + it.test_data_format),
-                 file("${baseDir}/reference_dataset/" + it.id + it.ref_data_format) ]
+    }
+    // log.info "Data IDs are $dataIds ===========" // #test #del
 
-        }
-        .set { reference_data }
+    if (skipReference) { refBenchmarkerList = false }
 
-        hits = reference_data.ifEmpty ( false )
+    // return dataIds
+    return [ pipelineInputList, refBenchmarkerList ]
 
-        hits.map {
-            if ( !it ) { exit 1, "Error: No reference data found for benchmarker" }
-        }
-
-    // return [ id, test_data_file, ref_data_file ]
-    // return refList
-    return reference_data
 }

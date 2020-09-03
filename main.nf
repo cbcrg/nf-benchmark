@@ -57,7 +57,7 @@ params.skip_benchmark = false
 
 // Include functions
 path_functions = "${projectDir}/modules/assets/functions.nf"
-include { setBenchmark; set_input_param; setReference } from path_functions
+include { setBenchmark; setInputParam; getData; setReferenceOld } from path_functions // #del
 
 // Pipeline
 // Include the pipeline from the modules path if available
@@ -65,7 +65,6 @@ include { setBenchmark; set_input_param; setReference } from path_functions
 // path_to_pipelines =  "${projectDir}/modules/pipelines"
 
 // pipeline_path = "${params.path_to_pipelines}/${params.pipeline}"
-
 
 // Include pipeline test for nf-benchmark
 test_config = file( "${params.pipeline_path}/conf/test_nfb.config", checkIfExists: true ) // TODO params!!!
@@ -79,30 +78,29 @@ yamlPathPipeline = "${params.pipeline_path}/meta.yml" //TODO check if exists
 
 csvPathMethods = "${baseDir}/assets/methods2benchmark.csv"
 csvPathBenchmarker = "${baseDir}/assets/dataFormat2benchmark.csv"
+csvPathReferenceOld = "${baseDir}/assets/referenceData.csv.bak" // #del
 csvPathReference = "${baseDir}/assets/referenceData.csv"
 
-// set_input_param(yamlPathPipeline)
+// setInputParam(yamlPathPipeline)
 // Dictionary?? //TODO
 // Think on cases where it might be more than  one input (described on the YAML) //TODO
-input_pipeline_param = set_input_param(yamlPathPipeline)
+input_pipeline_param = setInputParam(yamlPathPipeline)
 // log.info "Input pipeline param>>>>>>>>> $input_pipeline_param\n" //#del
 
 infoBenchmark = setBenchmark(yamlPathPipeline, csvPathMethods, params.pipeline, input_pipeline_param)
 // log.info (infoBenchmark) // [benchmarker:bali_score, operation:operation_0492, input_data:data_1233, input_format:format_1929, output_data:data_1384, output_format:format_1984]
-
-// ref_data = setReferenceOld (infoBenchmark, csvPathBenchmarker, csvPathReference) //#del
-// params.ref_data = ref_data //#del
-
-//Interpolate input dataset read from yml
+                                                        //MSA
+// Interpolate input dataset read from yml
 // Can I use a function to override a param?
 
 /*
  * Get name of the input parameter of pipeline
  */
-//include setReference from './resources/functions.nf'
+// include setReference from './resources/functions.nf'
 // log.info "${params.skip_benchmark}" //del
 
 benchmark_module = ""
+input_benchmark_param = ""
 
 if (!params.skip_benchmark) {
   benchmark_path = "${params.path_to_benchmarks}/${infoBenchmark.benchmarker}"
@@ -111,7 +109,7 @@ if (!params.skip_benchmark) {
 
   // yamlPathBenchmark = "${baseDir}/modules/benchmarks/${infoBenchmark.benchmarker}/meta.yml"
   yamlPathBenchmark = "${benchmark_path}/meta.yml"
-  input_benchmark_param = set_input_param(yamlPathBenchmark)
+  input_benchmark_param = setInputParam(yamlPathBenchmark)
 }
 else {
     log.info "INFO: Skip benchmark set to true\n"
@@ -124,9 +122,10 @@ else {
 // Set input and reference data sets
 // TODO: Separate in two functions so that the reference is not set if skip_benchmark para is set?
 // TODO: In any case is a good idea to keep it separated to avoid problems when modifying one or the other // #del
-(input_data, ref_data) = setReference (infoBenchmark, csvPathBenchmarker, csvPathReference)
-log.info "********* Input data set to >>>>>>>>>>> $input_data\n" //#del
-log.info "********* Ref data set to >>>>>>>>>>> $ref_data\n" //#del
+(input_data, ref_data)  = getData (infoBenchmark, csvPathReference, params.skip_benchmark) // #test
+
+// log.info "********* Input data set to >>>>>>>>>>> $input_data\n" //#del
+// log.info "********* Ref data set to >>>>>>>>>>> $ref_data\n" //#del
 
 params[input_pipeline_param] = input_data
 
@@ -141,10 +140,8 @@ if (!params.skip_benchmark) {
 
 log.info """
         ************************
-        pipeline input name:
-        ${input_pipeline_param}\n
-        benchmark input name:
-        ${input_benchmark_param}\n
+        pipeline input name: ${input_pipeline_param}\n
+        benchmark input name: ${input_benchmark_param}\n
         ************************
         """.stripIndent()
 
@@ -188,13 +185,15 @@ workflow {
     // pipeline.out."$output_name".view() //WORKS
     // pipeline.out.view() //WORKS
 
-    output_to_benchmark.view()
-    len = pipeline.out.size()
+    // output_to_benchmark.view() // #del
+    // len = pipeline.out.size()
     // len = output_to_benchmark.size() // Does not work
 
+    /*
     log.info """
     Length output... ${len}\n
     """.stripIndent()
+    */
 
     // I need to declare the output of the pipeline that the benchmark should use
     

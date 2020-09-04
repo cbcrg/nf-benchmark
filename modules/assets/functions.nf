@@ -40,10 +40,8 @@ def setInputParam (path) {
     def pipelineConfigYml = readYml (path)
 
     // Get all input parameters
+    // input_param = pipelineConfigYml.input.input_param[0][0]
     map_input = pipelineConfigYml.input[0][0]
-    //log.info "1.......... ${pipelineConfigYml.input[0][0]['seqs'][bench_bool]}"
-    //log.info "2..........  ${pipelineConfigYml.input.seqs.edam_data[0][0]}"
-    //log.info "3.......... ${map_input['seqs'][bench_bool]} ......"
 
     // Checks whether yml has the input_nfb field check to true (input nf-benchmark)
     map_input.each{
@@ -52,7 +50,6 @@ def setInputParam (path) {
             input_param = it.key
         }
     }
-    // input_param = pipelineConfigYml.input.input_param[0][0]
 
     return input_param
 }
@@ -135,64 +132,13 @@ def setBenchmark (configYmlFile, benchmarkInfo, pipeline, input_field) {
  */
 //csvPathBenchmarker = "${baseDir}/assets/dataFormat2benchmark.csv"
 //csvPathReference = "${baseDir}/assets/referenceData.csv"
-def setReferenceOld (benchmarkInfo, benchmarkerCsv, refDataCsv) {
-
-    def dataFormat2benchmark = readCsv(benchmarkerCsv)
-    def refData = readCsv(refDataCsv)
-
-    def i = 0
-    def refDataDict = [:]
-
-    for( row in dataFormat2benchmark ) {
-        if ( row.edam_test_format == benchmarkInfo.input_format  &&
-             row.edam_ref_format  == benchmarkInfo.output_format &&
-             row.benchmarker      == benchmarkInfo.benchmarker ) {
-                i += 1
-
-                refDataDict[ (i) ] = [ benchmarker: row.benchmarker,
-                                        test_format: row.edam_test_format,
-                                        ref_format : row.edam_ref_format ]
-             // log.info "benchmarker is $row.benchmarker ===========" // #debug
-        }
-    }
-
-    // There can be more than one type of data for a given benchmarker
-    // log.info "Type of data for a given benchmarker...................." +  refDataDict.size()
-
-    if ( refDataDict.size() > 1 ) exit 1, "Error: More than one possible benchmarker please refine pipeline description for \"${params.pipeline}\" pipeline"
-    if ( refDataDict.size() == 0 ) exit 1, "Error: The selected pipeline  \"${params.pipeline}\" is not included in nf-benchmark"
-
-    refDataHit = refDataDict [ 1 ]
-
-    // def refList = []
-    def pipelineInputList = []
-    def refBenchmarkerList = []
-
-    for( row in refData ) {
-        if ( row.benchmarker == refDataHit.benchmarker) {
-            id = row.id
-            test_data_file = row.id + row.test_data_format
-            ref_data_file = row.id + row.ref_data_format
-
-            pipelineInputList.add ("${baseDir}/reference_dataset/" + test_data_file)
-            refBenchmarkerList.add ("${baseDir}/reference_dataset/" + ref_data_file)
-            // refList.add(  [ id, test_data_file, ref_data_file ] )
-        }
-    }
-
-    return [ pipelineInputList, refBenchmarkerList ]
-}
-
-/*
- * Functions returns the test and reference data to be used given a benchmarker
- */
-//csvPathBenchmarker = "${baseDir}/assets/dataFormat2benchmark.csv"
-//csvPathReference = "${baseDir}/assets/referenceData.csv"
 /*
  * benchmarkInfo =
  */
 def getData (benchmarkInfo, refDataCsv, skipReference) {
-
+    log.info"""
+    benchmarkInfo................... ${benchmarkInfo}
+    """.stripIndent()
     def refData = readCsv(refDataCsv)
 
     def i = 0
@@ -216,7 +162,6 @@ def getData (benchmarkInfo, refDataCsv, skipReference) {
              dataIds.add ( id )
         }
     }
-    // log.info "Data IDs are $dataIds ===========" // #test #del
 
     if (skipReference) { refBenchmarkerList = false }
 

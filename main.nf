@@ -49,18 +49,17 @@ Pipeline: ${params.pipeline}
 pipeline_module = file( "${params.pipeline_path}/main.nf" )
 if( !pipeline_module.exists() ) exit 1, "ERROR: The selected pipeline is not correctly included in nf-benchmark: ${params.pipeline}"
 
-projectDir = "${baseDir}"
-params.outdir = "${projectDir}/results"
+params.outdir = "${workflow.projectDir}/results"
 params.skip_benchmark = false
 
 // Include functions
-path_functions = "${projectDir}/modules/assets/functions.nf"
+path_functions = "${workflow.projectDir}/modules/assets/functions.nf"
 include { setBenchmark; setInputParam; getData } from path_functions
 
 // Pipeline
 // Include the pipeline from the modules path if available
-// params.path_to_pipelines = "${projectDir}/modules/pipelines" 
-// path_to_pipelines =  "${projectDir}/modules/pipelines"
+// params.path_to_pipelines = "${workflow.projectDir}/modules/pipelines"
+// path_to_pipelines =  "${workflow.projectDir}/modules/pipelines"
 // pipeline_path = "${params.path_to_pipelines}/${params.pipeline}"
 
 // Include pipeline test for nf-benchmark
@@ -70,8 +69,8 @@ test_config = file( "${params.pipeline_path}/conf/test_nfb.config", checkIfExist
 yamlPathPipeline = "${params.pipeline_path}/meta.yml" //TODO check if exists
 
 // Benchmark
-// path_to_benchmarks =  "${projectDir}/modules/benchmarks"
-// params.path_to_benchmarks = "${projectDir}/modules/benchmarks"
+// path_to_benchmarks =  "${workflow.projectDir}/modules/benchmarks"
+// params.path_to_benchmarks = "${workflow.projectDir}/modules/benchmarks"
 
 csvPathMethods = "${baseDir}/assets/methods2benchmark.csv"
 csvPathBenchmarker = "${baseDir}/assets/dataFormat2benchmark.csv"

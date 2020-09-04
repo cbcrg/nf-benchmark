@@ -61,7 +61,6 @@ include { setBenchmark; setInputParam; getData } from path_functions
 // Include the pipeline from the modules path if available
 // params.path_to_pipelines = "${projectDir}/modules/pipelines" 
 // path_to_pipelines =  "${projectDir}/modules/pipelines"
-
 // pipeline_path = "${params.path_to_pipelines}/${params.pipeline}"
 
 // Include pipeline test for nf-benchmark
@@ -96,7 +95,7 @@ input_benchmark_param = ""
 if (!params.skip_benchmark) {
   benchmark_path = "${params.path_to_benchmarks}/${infoBenchmark.benchmarker}"
   benchmark_module = file( "${benchmark_path}/main.nf" )
-  if( !benchmark_module.exists() ) exit 1, "ERROR: The selected benchmark is not correctly included in nf-benchmark: ${infoBenchmark.benchmarker}"
+  if( !benchmark_module.exists() ) exit 1, "[ERROR]: The selected benchmark is not correctly included in nf-benchmark: ${infoBenchmark.benchmarker}"
 
   // yamlPathBenchmark = "${baseDir}/modules/benchmarks/${infoBenchmark.benchmarker}/meta.yml"
   yamlPathBenchmark = "${benchmark_path}/meta.yml"
@@ -122,12 +121,14 @@ if (!params.skip_benchmark) {
 // params['reference'] = "${baseDir}/reference_dataset/BB11001.xml"
 // benchmarker = "bali_base"
 
+/* // #del
 log.info """
         ************************
         pipeline input name: ${input_pipeline_param}\n
         benchmark input name: ${input_benchmark_param}\n
         ************************
         """.stripIndent()
+*/
 
 include { pipeline } from pipeline_module params(params)
 if (!params.skip_benchmark) {

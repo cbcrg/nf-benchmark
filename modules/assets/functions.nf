@@ -118,7 +118,7 @@ def setBenchmark (configYmlFile, benchmarkInfo, pipeline, input_field) {
 
     if ( benchmarkDict.size() > 1 ) {
         log.info """
-        More than one possible benchmarker for \"${params.pipeline}\" pipeline benchmarker set to \"${benchmarkDict[higher_priority].benchmarker}\" (higher priority)
+        [WARNING]: More than one possible benchmarker for \"${params.pipeline}\" pipeline benchmarker set to \"${benchmarkDict[higher_priority].benchmarker}\" (higher priority)
         """.stripIndent()
         benchmarkDict = benchmarkDict [ higher_priority ]
     }
@@ -133,12 +133,18 @@ def setBenchmark (configYmlFile, benchmarkInfo, pipeline, input_field) {
 //csvPathBenchmarker = "${baseDir}/assets/dataFormat2benchmark.csv"
 //csvPathReference = "${baseDir}/assets/referenceData.csv"
 /*
- * benchmarkInfo =
+ * Example of benchmarkInfo map:
+ * benchmarkInfo = [ benchmarker: "bali_score",
+ *                   operation: "operation_0492",
+ *                   input_data: "data_1233",
+ *                   input_format: "format_1929",
+ *                   output_data: "data_1384",
+ *                   output_format: "format_1984" ]
+ * refDataCsv    = Path to table containing the relationship between pipeline input, output and the corresponding benchmarker
+ * skipReference = When set to true do not return reference data
  */
 def getData (benchmarkInfo, refDataCsv, skipReference) {
-    log.info"""
-    benchmarkInfo................... ${benchmarkInfo}
-    """.stripIndent()
+
     def refData = readCsv(refDataCsv)
 
     def i = 0
@@ -148,7 +154,7 @@ def getData (benchmarkInfo, refDataCsv, skipReference) {
     def refBenchmarkerList  = []
 
     for ( row in refData ) {
-        if ( row.benchmarker == benchmarkInfo.benchmarker &&
+        if ( row.benchmarker           == benchmarkInfo.benchmarker &&
              row.pipeline_input_format == benchmarkInfo.input_format  &&
              row.benchmark_ref_format  == benchmarkInfo.output_format ) {
 

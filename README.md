@@ -81,6 +81,18 @@ make regressive | nextflow run main.nf \
     -resume
 ```
 
+/*
+ * COMMANDS
+ * nextflow run main.nf --pipeline tcoffee --skip_benchmark -profile docker,test_nfb -ansi-log false -resume
+ * nextflow run main.nf --pipeline tcoffee --pipeline_output_name 'alignment' --skip_benchmark -profile docker,test_nfb -ansi-log false -resume
+ * make regressive | nextflow run  main.nf --pipeline regressive_alignment --skip_benchmark -profile docker,test_nfb -ansi-log false -resume
+ * make regressive | nextflow run  main.nf --pipeline regressive_alignment --pipeline_output_name 'alignment_regressive' --skip_benchmark -profile docker,test_nfb -ansi-log false -resume
+ * COMMANDS WITH BENCHMARK
+ * nextflow run main.nf --pipeline tcoffee -profile docker,test_nfb -ansi-log false -resume
+ * nextflow run main.nf --pipeline tcoffee --pipeline_output_name 'alignment' --skip_benchmark -profile docker,test_nfb -ansi-log false -resume
+ * make regressive | nextflow run  main.nf --pipeline regressive_alignment --skip_benchmark -profile docker,test_nfb -ansi-log false -resume
+ * make regressive | nextflow run  main.nf --pipeline regressive_alignment --pipeline_output_name 'alignment_regressive' --skip_benchmark -profile docker,test_nfb -ansi-log false -resume
+ */
 
 ## declare workflow on main as pipeline  
 
@@ -112,3 +124,27 @@ Otherwise, you can use your own test file using -c option see
 --params.path_to_pipelines
 
 --params.path_to_benchmarks
+
+## Tables description:
+
+### methods2benchmark:
+
+The **methods2benchmark.csv** table contains the relationship between the pipeline method, its data input output and 
+finally the benchmark, it contains the following fields:
+
+* edam_operation
+* edam_input_data
+* edam_input_format
+* edam_output_data 
+* edam_output_format
+* benchmarker
+
+The input and output data of benchmarkers can be found in **dataFormat2benchmark.csv**. The fields of the table are:
+
+* benchmarker
+* edam_operation
+* edam_test_data
+* edam_test_format
+* edam_ref_data
+* edam_ref_format
+   

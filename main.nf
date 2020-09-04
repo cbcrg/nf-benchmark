@@ -51,13 +51,11 @@ if( !pipeline_module.exists() ) exit 1, "ERROR: The selected pipeline is not cor
 
 projectDir = "${baseDir}"
 params.outdir = "${projectDir}/results"
-// params.ref_data = ''
-// params.sequences = ''
 params.skip_benchmark = false
 
 // Include functions
 path_functions = "${projectDir}/modules/assets/functions.nf"
-include { setBenchmark; setInputParam; getData; setReferenceOld } from path_functions // #del
+include { setBenchmark; setInputParam; getData } from path_functions
 
 // Pipeline
 // Include the pipeline from the modules path if available
@@ -78,27 +76,20 @@ yamlPathPipeline = "${params.pipeline_path}/meta.yml" //TODO check if exists
 
 csvPathMethods = "${baseDir}/assets/methods2benchmark.csv"
 csvPathBenchmarker = "${baseDir}/assets/dataFormat2benchmark.csv"
-csvPathReferenceOld = "${baseDir}/assets/referenceData.csv.bak" // #del
 csvPathReference = "${baseDir}/assets/referenceData.csv"
 
-// setInputParam(yamlPathPipeline)
 // Dictionary?? //TODO
-// Think on cases where it might be more than  one input (described on the YAML) //TODO
+// Think on cases where it might be more than one input (described on the YAML) //TODO
 input_pipeline_param = setInputParam(yamlPathPipeline)
-// log.info "Input pipeline param>>>>>>>>> $input_pipeline_param\n" //#del
 
 infoBenchmark = setBenchmark(yamlPathPipeline, csvPathMethods, params.pipeline, input_pipeline_param)
 // log.info (infoBenchmark) // [benchmarker:bali_score, operation:operation_0492, input_data:data_1233, input_format:format_1929, output_data:data_1384, output_format:format_1984]
                                                         //MSA
-// Interpolate input dataset read from yml
-// Can I use a function to override a param?
 
 /*
  * Get name of the input parameter of pipeline
  */
 // include setReference from './resources/functions.nf'
-// log.info "${params.skip_benchmark}" //del
-
 benchmark_module = ""
 input_benchmark_param = ""
 
@@ -115,17 +106,8 @@ else {
     log.info "INFO: Skip benchmark set to true\n"
 }
 
-// Assign the input parameter
-// TODO Deal with test config test data TRY WITH EMPTY PARAM if param = "" set this one
-// if is set by test config do not reset?
-
 // Set input and reference data sets
-// TODO: Separate in two functions so that the reference is not set if skip_benchmark para is set?
-// TODO: In any case is a good idea to keep it separated to avoid problems when modifying one or the other // #del
-(input_data, ref_data)  = getData (infoBenchmark, csvPathReference, params.skip_benchmark) // #test
-
-// log.info "********* Input data set to >>>>>>>>>>> $input_data\n" //#del
-// log.info "********* Ref data set to >>>>>>>>>>> $ref_data\n" //#del
+(input_data, ref_data)  = getData (infoBenchmark, csvPathReference, params.skip_benchmark)
 
 params[input_pipeline_param] = input_data
 
@@ -133,10 +115,12 @@ if (!params.skip_benchmark) {
     params[input_benchmark_param] = ref_data
 }
 
-// Hardcodes testing - aligment BB11001 // #del
-// params[input_pipeline_param] = "${baseDir}/reference_dataset/BB11001.fa" // #del
-// params['reference'] = "${baseDir}/reference_dataset/BB11001.xml" // #del
-// benchmarker = "bali_base" // #del
+/*
+ * Hardcodes for testing - aligment BB11001 // #del
+ */
+// params[input_pipeline_param] = "${baseDir}/reference_dataset/BB11001.fa"
+// params['reference'] = "${baseDir}/reference_dataset/BB11001.xml"
+// benchmarker = "bali_base"
 
 log.info """
         ************************
@@ -152,19 +136,6 @@ if (!params.skip_benchmark) {
 include { mean_benchmark_score } from "${baseDir}/modules/mean_benchmark_score/main.nf" //TODO make it generic
 //The previous include should be a module included in the benchmark pipeline
 
-/*
- * COMMANDS
- * nextflow run main.nf --pipeline tcoffee --skip_benchmark -profile docker,test_nfb -ansi-log false -resume
- * nextflow run main.nf --pipeline tcoffee --pipeline_output_name 'alignment' --skip_benchmark -profile docker,test_nfb -ansi-log false -resume
- * make regressive | nextflow run  main.nf --pipeline regressive_alignment --skip_benchmark -profile docker,test_nfb -ansi-log false -resume
- * make regressive | nextflow run  main.nf --pipeline regressive_alignment --pipeline_output_name 'alignment_regressive' --skip_benchmark -profile docker,test_nfb -ansi-log false -resume
- * COMMANDS WITH BENCHMARK
- * nextflow run main.nf --pipeline tcoffee -profile docker,test_nfb -ansi-log false -resume
- * nextflow run main.nf --pipeline tcoffee --pipeline_output_name 'alignment' --skip_benchmark -profile docker,test_nfb -ansi-log false -resume
- * make regressive | nextflow run  main.nf --pipeline regressive_alignment --skip_benchmark -profile docker,test_nfb -ansi-log false -resume
- * make regressive | nextflow run  main.nf --pipeline regressive_alignment --pipeline_output_name 'alignment_regressive' --skip_benchmark -profile docker,test_nfb -ansi-log false -resume
- */
-
 params.pipeline_output_name = false
 //params.pipeline_output_name = 'alignment_regressive'
 
@@ -173,7 +144,7 @@ workflow {
 
     pipeline()
 
-    // By default take ".out" if provided (or exists) then used the named output
+    // By default take ".out" if provided (or exists) then used the named output (params.pipeline_output_name)
     if (!params.pipeline_output_name) {
         output_to_benchmark = pipeline.out[0]
     }
@@ -181,23 +152,6 @@ workflow {
         output_to_benchmark = pipeline.out."$params.pipeline_output_name"
     }
 
-    // pipeline.out.alignment_regressive.view() //WORKS
-    // pipeline.out."$output_name".view() //WORKS
-    // pipeline.out.view() //WORKS
-
-    // output_to_benchmark.view() // #del
-    // len = pipeline.out.size()
-    // len = output_to_benchmark.size() // Does not work
-
-    /*
-    log.info """
-    Length output... ${len}\n
-    """.stripIndent()
-    */
-
-    // I need to declare the output of the pipeline that the benchmark should use
-    
-    // commented it is called even if skip_benchmark is set to true reimplement
     if (!params.skip_benchmark) {
 
         log.info """

@@ -133,7 +133,7 @@ include { pipeline } from pipeline_module params(params)
 if (!params.skip_benchmark) {
     include { benchmark } from benchmark_module params(params)
 }
-include { mean_benchmark_score } from "${baseDir}/modules/mean_benchmark_score/main.nf" //TODO make it generic
+include { mean_benchmark_score } from "${baseDir}/modules/benchmarks/mean_benchmark_score/main.nf" //TODO make it generic
 //The previous include should be a module included in the benchmark pipeline
 
 params.pipeline_output_name = false

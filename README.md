@@ -13,6 +13,27 @@ The nf-benchmark documentation is split into the following files:
 4. [Output and how to interpret the results](output.md)
 5. [Troubleshooting](https://nf-co.re/usage/troubleshooting)
 
+## Quick start
+
+1. Install [`nextflow`](https://www.nextflow.io/docs/latest/getstarted.html#installation)
+
+2. Install either [`Docker`](https://docs.docker.com/engine/installation/) or 
+[`Singularity`](https://www.sylabs.io/guides/3.0/user-guide/) to use the sandboxes images containing the software used 
+by the pipeline.
+
+3. Clone the repository:
+
+```bash
+git clone https://github.com/cbcrg/nf-benchmark
+```
+4. Run nf-benchmark
+
+```bash
+nextflow run main.nf --pipeline tcoffee -profile docker,test_nfb -resume
+```
+
+## Add your pipeline 
+
 ## How to run the pipeline
 
 ### From root
@@ -80,19 +101,6 @@ make regressive | nextflow run main.nf \
     -ansi-log false \
     -resume
 ```
-
-/*
- * COMMANDS
- * nextflow run main.nf --pipeline tcoffee --skip_benchmark -profile docker,test_nfb -ansi-log false -resume
- * nextflow run main.nf --pipeline tcoffee --pipeline_output_name 'alignment' --skip_benchmark -profile docker,test_nfb -ansi-log false -resume
- * make regressive | nextflow run  main.nf --pipeline regressive_alignment --skip_benchmark -profile docker,test_nfb -ansi-log false -resume
- * make regressive | nextflow run  main.nf --pipeline regressive_alignment --pipeline_output_name 'alignment_regressive' --skip_benchmark -profile docker,test_nfb -ansi-log false -resume
- * COMMANDS WITH BENCHMARK
- * nextflow run main.nf --pipeline tcoffee -profile docker,test_nfb -ansi-log false -resume
- * nextflow run main.nf --pipeline tcoffee --pipeline_output_name 'alignment' --skip_benchmark -profile docker,test_nfb -ansi-log false -resume
- * make regressive | nextflow run  main.nf --pipeline regressive_alignment --skip_benchmark -profile docker,test_nfb -ansi-log false -resume
- * make regressive | nextflow run  main.nf --pipeline regressive_alignment --pipeline_output_name 'alignment_regressive' --skip_benchmark -profile docker,test_nfb -ansi-log false -resume
- */
 
 ## declare workflow on main as pipeline  
 

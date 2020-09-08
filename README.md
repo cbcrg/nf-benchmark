@@ -34,7 +34,24 @@ nextflow run main.nf --pipeline tcoffee -profile docker,test_nfb -resume
 
 ## Add your pipeline 
 
+If you want to include your pipeline on nf-benchmark you just need to:
+* Place the pipeline under the `modules/pipelines` directory e.g. 'modules/pipelines/my_pipeline'
+* Create a `yml` file that includes some meta-information of your pipeline so that nf-benchmark can correctly run it. See
+the `tcoffee` pipeline example [here](https://github.com/cbcrg/nf-benchmark/blob/master/modules/pipelines/tcoffee/meta.yml)
+* Include a nextflow configuration file that should be named `test_nfb.config` and should be 
+placed under `modules/pipelines/my_pipeline/conf/`, find the tcoffee example on this 
+[link](https://github.com/cbcrg/nf-benchmark/blob/master/modules/pipelines/tcoffee/conf/test_nfb.config). This 
+configuration should at least provide a input dataset for testing purposes. If you follow these steps you should be able
+to run your pipeline under nf-benchmark using the following command: 
+
+```bash
+nextflow run main.nf --pipeline my_pipeline --skip_benchnmark -profile test_nfb -resume
+```
+
+and use provide its name using the `--pipeline` parameter. For instance  
+ 
 ## How to run the pipeline
+
 
 ### From root
 

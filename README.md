@@ -1,21 +1,13 @@
 # nf-benchmark
 
-# nf-benchmark: Documentation
+## Introduction:
 
-The nf-benchmark documentation is split into the following files:
-
-1. [Installation](https://nf-co.re/usage/installation)
-2. Pipeline configuration
-    * [Local installation](https://nf-co.re/usage/local_installation)
-    * [Adding your own system config](https://nf-co.re/usage/adding_own_config)
-    * [Reference genomes](https://nf-co.re/usage/reference_genomes)
-3. [Running the pipeline](usage.md)
-4. [Output and how to interpret the results](output.md)
-5. [Troubleshooting](https://nf-co.re/usage/troubleshooting)
+nf-benchmark is a benchmarking tool based on nextflow DSL2 that allows to include your nextflow pipeline as a module for 
+its benchmarking.
 
 ## Quick start
 
-1. Install [`nextflow`](https://www.nextflow.io/docs/latest/getstarted.html#installation)
+1. Install **Nextflow** following [this](https://www.nextflow.io/docs/latest/getstarted.html#installation) instructions.
 
 2. Install either [`Docker`](https://docs.docker.com/engine/installation/) or 
 [`Singularity`](https://www.sylabs.io/guides/3.0/user-guide/) to use the sandboxes images containing the software used 
@@ -26,6 +18,7 @@ by the pipeline.
 ```bash
 git clone https://github.com/cbcrg/nf-benchmark
 ```
+
 4. Run nf-benchmark
 
 ```bash
@@ -44,12 +37,25 @@ placed under `modules/pipelines/my_pipeline/conf/`, find the tcoffee example on 
 configuration should at least provide a input dataset for testing purposes. If you follow these steps you should be able
 to run your pipeline under nf-benchmark using the following command: 
 
-```bash
-nextflow run main.nf --pipeline my_pipeline --skip_benchnmark -profile test_nfb -resume
-```
+    ```bash
+    nextflow run main.nf --pipeline my_pipeline --skip_benchnmark -profile test_nfb -resume
+    ```
 
-and use provide its name using the `--pipeline` parameter. For instance  
- 
+    Note that the `--pipeline` parameter design the name of the pipeline run.
+
+# nf-benchmark: Documentation
+
+The nf-benchmark documentation is split into the following files:
+
+1. [Installation](https://nf-co.re/usage/installation)
+2. Pipeline configuration
+    * [Local installation](https://nf-co.re/usage/local_installation)
+    * [Adding your own system config](https://nf-co.re/usage/adding_own_config)
+    * [Reference genomes](https://nf-co.re/usage/reference_genomes)
+3. [Running the pipeline](usage.md)
+4. [Output and how to interpret the results](output.md)
+5. [Troubleshooting](https://nf-co.re/usage/troubleshooting)
+
 ## How to run the pipeline
 
 

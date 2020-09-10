@@ -69,8 +69,8 @@ test_config = file( "${params.pipeline_path}/conf/test_nfb.config", checkIfExist
 yamlPathPipeline = "${params.pipeline_path}/meta.yml" //TODO check if exists
 
 // Benchmark
-// path_to_benchmarks =  "${workflow.projectDir}/modules/benchmarks"
-// params.path_to_benchmarks = "${workflow.projectDir}/modules/benchmarks"
+// path_to_benchmarkers =  "${workflow.projectDir}/modules/benchmarkers"
+// params.path_to_benchmarkers = "${workflow.projectDir}/modules/benchmarkers"
 
 csvPathMethods = "${baseDir}/assets/methods2benchmark.csv"
 csvPathBenchmarker = "${baseDir}/assets/dataFormat2benchmark.csv"
@@ -92,11 +92,11 @@ benchmark_module = ""
 input_benchmark_param = ""
 
 if (!params.skip_benchmark) {
-  benchmark_path = "${params.path_to_benchmarks}/${infoBenchmark.benchmarker}"
+  benchmark_path = "${params.path_to_benchmarkers}/${infoBenchmark.benchmarker}"
   benchmark_module = file( "${benchmark_path}/main.nf" )
   if( !benchmark_module.exists() ) exit 1, "[ERROR]: The selected benchmark is not correctly included in nf-benchmark: ${infoBenchmark.benchmarker}"
 
-  // yamlPathBenchmark = "${baseDir}/modules/benchmarks/${infoBenchmark.benchmarker}/meta.yml"
+  // yamlPathBenchmark = "${baseDir}/modules/benchmarkers/${infoBenchmark.benchmarker}/meta.yml"
   yamlPathBenchmark = "${benchmark_path}/meta.yml"
   input_benchmark_param = setInputParam(yamlPathBenchmark)
 }
@@ -133,7 +133,7 @@ include { pipeline } from pipeline_module params(params)
 if (!params.skip_benchmark) {
     include { benchmark } from benchmark_module params(params)
 }
-include { mean_benchmark_score } from "${baseDir}/modules/benchmarks/mean_benchmark_score/main.nf" //TODO make it generic
+include { mean_benchmark_score } from "${baseDir}/modules/benchmarkers/mean_benchmark_score/main.nf" //TODO make it generic
 //The previous include should be a module included in the benchmark pipeline
 
 params.pipeline_output_name = false

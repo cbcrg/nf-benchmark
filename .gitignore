@@ -1,1 +1,14 @@
 /modules/pipelines/regressive_alignment_new/*
+.nextflow*
+results/*
+tests/results/pipeline_info/*
+metainfo/**
+tests/**
+modules/**/results
+modules/**/metainfo
+.idea/**
+*.config.*
+test.nf
+TODOs.md
+
+

@@ -19,9 +19,7 @@ workflow REG_ANALYSIS {
      
   main: 
     REG_ALIGNER (seqs_and_trees, align_method, bucket_size)
-
-    def eval_tc_score = Channel.empty()
-
+   
     if (params.evaluate){
       refs_ch
         .cross (REG_ALIGNER.out.alignmentFile)
@@ -29,8 +27,6 @@ workflow REG_ANALYSIS {
         .set { alignment_and_ref }
 
       EVAL_ALIGNMENT ("regressive", alignment_and_ref, REG_ALIGNER.out.alignMethod, REG_ALIGNER.out.treeMethod, REG_ALIGNER.out.bucketSize)
-      eval_tc_score = EVAL_ALIGNMENT.out.tcScore
-
       EVAL_ALIGNMENT.out.tcScore
                     .map{ it ->  "${it[0]};${it[1]};${it[2]};${it[3]};${it[4]};${it[5].text}" }
                     .collectFile(name: "${workflow.runName}.regressive.tcScore.csv", newLine: true, storeDir:"${params.outdir}/CSV/${workflow.runName}/")
@@ -65,7 +61,6 @@ workflow REG_ANALYSIS {
 
     emit:
     alignment = REG_ALIGNER.out.alignmentFile
-    tc_score = eval_tc_score
     metrics = metrics_regressive
     easel = easel_info
 

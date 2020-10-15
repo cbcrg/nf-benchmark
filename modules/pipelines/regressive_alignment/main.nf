@@ -184,7 +184,6 @@ dynamicX = params.dynamicX.toString().tokenize(',')       //int to string
 workflow pipeline {
 
     def trees = params.trees? input_trees : TREE_GENERATION (seqs_ch, tree_method).trees
-    def map_alignments = [:]
 
     seqs_ch
         .cross(trees)
@@ -195,30 +194,15 @@ workflow pipeline {
     if (params.regressive_align){
         REG_ANALYSIS(seqs_and_trees, refs_ch, align_method, tree_method, bucket_list)
         alignment_regressive_r = REG_ANALYSIS.out.alignment
-        map_alignments['regressive'] = REG_ANALYSIS.out.alignment
     }
 
     alignment_progressive_r = Channel.empty()
-    gaps_progressive = Channel.empty()
-    easel_progressive = Channel.empty()
-    eval_progressive = Channel.empty()
 
     if (params.progressive_align){
         PROG_ANALYSIS(seqs_and_trees, refs_ch, align_method, tree_method)
         alignment_progressive_r = PROG_ANALYSIS.out.alignment
-        map_alignments['progressive'] = REG_ANALYSIS.out.alignment
-        if (params.gapCount){
-            gaps_progressive = PROG_ANALYSIS.out.gaps
-        }
-        if (params.easel){
-            easel_progressive = PROG_ANALYSIS.out.easel
-        }
-        if (params.evaluate) {
-            eval_progressive = PROG_ANALYSIS.out.tc_score
-        }
     }
 
-    //eval_progressive.view()
     alignment_slave_r = Channel.empty()
     if (params.slave_align){
         SLAVE_ANALYSIS(seqs_and_trees, refs_ch, align_method, tree_method, bucket_list, slave_method)
@@ -237,26 +221,9 @@ workflow pipeline {
       alignment_pool_r = POOL_ANALYSIS.out.alignment
     }
 
-    /*
-    if (params.evaluate) {
-    //juntar los channels y entonces hacer la evaluacion
-        map_alignments.each { println "alignment: $it.key = channel_align: $it.value"
-
-            EVAL_ALIGNMENT ($it.key, alignment_and_ref, $it.value, PROG_ALIGNER.out.treeMethod, "NA")
-
-        }
-
-        //for (alignment in map_alignments) {
-        //    "$alignment ======================\n"
-        //}
-    }
-    */
-
     emit:
-    //alignment_regressive = alignment_regressive_r
-    //alignment_progressive = alignment_progressive_r
-    alignment_regressive = map_alignments['regressive']
-    alignment_progressive = map_alignments['progressive']
+    alignment_regressive = alignment_regressive_r
+    alignment_progressive = alignment_progressive_r
     alignment_slave = alignment_slave_r
     alignment_dynamic = alignment_dynamic_r
     alignment_pool = alignment_pool_r

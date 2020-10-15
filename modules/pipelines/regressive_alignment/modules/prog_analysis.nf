@@ -17,17 +17,13 @@ workflow PROG_ANALYSIS {
   main:
     PROG_ALIGNER (seqs_and_trees, align_method)
 
-    def eval_tc_score = Channel.empty()
-
     if (params.evaluate){
       refs_ch
         .cross (PROG_ALIGNER.out.alignmentFile)
         .map { it -> [ it[1][0], it[1][1], it[0][1] ] }
         .set { alignment_and_ref }
 
-      EVAL_ALIGNMENT ("progressive", alignment_and_ref, PROG_ALIGNER.out.alignMethod, PROG_ALIGNER.out.treeMethod, "NA")
-      eval_tc_score = EVAL_ALIGNMENT.out.tcScore
-
+      EVAL_ALIGNMENT ("progressive", alignment_and_ref, PROG_ALIGNER.out.alignMethod, PROG_ALIGNER.out.treeMethod,"NA")
       EVAL_ALIGNMENT.out.tcScore
                     .map{ it ->  "${it[0]};${it[1]};${it[2]};${it[3]};${it[4]};${it[5].text}" }
                     .collectFile(name: "${workflow.runName}.progressive.tcScore.csv", newLine: true, storeDir:"${params.outdir}/CSV/${workflow.runName}/")
@@ -45,11 +41,6 @@ workflow PROG_ANALYSIS {
 
     emit:
     alignment = PROG_ALIGNER.out.alignmentFile
-    tc_score = eval_tc_score
-    gaps = gaps_progressive
-    metrics = metrics_progressive
-    easel = easel_info
-
 }
 
 include {INTRAMOL_MATRIX_GENERATION}          from './preprocess.nf'

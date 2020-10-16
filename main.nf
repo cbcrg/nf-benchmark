@@ -27,7 +27,7 @@
  * - Jose Espinosa-Carrasco <espinosacarrascoj@gmail.com>
  */
 
-nextflow.preview.dsl = 2
+nextflow.enable.dsl = 2
 
 import org.yaml.snakeyaml.Yaml
 

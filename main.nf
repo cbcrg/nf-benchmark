@@ -22,12 +22,15 @@
  * under the License.
  */
 
- /*
- * Proof of concept of nf-benchmark: An automatic benchmarking pipeline implemented with Nextflow
- *
- * Authors:
- * - Jose Espinosa-Carrasco <espinosacarrascoj@gmail.com>
- */
+/*
+========================================================================================
+                         nf-benchmark
+========================================================================================
+ nf-benchmark Benchmarking Pipeline.
+ Authors:
+ Jose Espinosa-Carrasco <espinosacarrascoj@gmail.com>
+----------------------------------------------------------------------------------------
+*/
 
 nextflow.enable.dsl = 2
 
@@ -55,7 +58,7 @@ def helpMessage() {
     nextflow run main.nf --pipeline pipeline_name -profile docker,test_nfb
 
     Mandatory arguments:
-      --profile [str]               Name of the pipeline to be run
+      --pipeline [str]              Name of the pipeline to be run
       -profile [str]                Configuration profile to use. Can use multiple (comma separated)
                                     Available: conda, docker, singularity, test, test_nfb, awsbatch, <institute> and more
 

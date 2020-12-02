@@ -50,12 +50,21 @@ Pipeline: ${params.pipeline}
 /*
  * Print help message if required
  */
+def json_schema = "$baseDir/nextflow_schema.json"
 if (params.help) {
     def command = "nextflow run nf-benchmark --pipeline tcoffee profile docker,test_nfb"
-    log.info Headers.nf_core(workflow, params.monochrome_logs)
-    log.info Schema.params_help("$baseDir/nextflow_schema.json", command)
+    log.info Schema.params_help(workflow, params, json_schema, command)
     exit 0
 }
+
+////////////////////////////////////////////////////
+/* --         PRINT PARAMETER SUMMARY          -- */
+////////////////////////////////////////////////////
+
+//def summary_params = Schema.params_summary_map(workflow, params, json_schema)
+//log.info Schema.params_summary_log(workflow, params, json_schema)
+
+
 
 // def helpMessage() {
 //     log.info nfcoreHeader()

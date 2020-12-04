@@ -132,8 +132,8 @@ test_config = file( "${params.pipeline_path}/conf/test_nfb.config", checkIfExist
 yamlPathPipeline = "${params.pipeline_path}/meta.yml" //TODO check if exists
 
 // Benchmark
-// path_to_benchmarkers =  "${workflow.projectDir}/modules/benchmarkers"
-// params.path_to_benchmarkers = "${workflow.projectDir}/modules/benchmarkers"
+// benchmarker_path =  "${workflow.projectDir}/modules/benchmarkers"
+// params.benchmarker_path = "${workflow.projectDir}/modules/benchmarkers"
 
 csvPathMethods = "${baseDir}/assets/methods2benchmark.csv"
 csvPathBenchmarker = "${baseDir}/assets/dataFormat2benchmark.csv"
@@ -155,7 +155,7 @@ benchmark_module = ""
 input_benchmark_param = ""
 
 if (!params.skip_benchmark) {
-  benchmark_path = "${params.path_to_benchmarkers}/${infoBenchmark.benchmarker}"
+  benchmark_path = "${params.benchmarker_path}/${infoBenchmark.benchmarker}"
   benchmark_module = file( "${benchmark_path}/main.nf" )
   if( !benchmark_module.exists() ) exit 1, "[ERROR]: The selected benchmark is not correctly included in nf-benchmark: ${infoBenchmark.benchmarker}"
 

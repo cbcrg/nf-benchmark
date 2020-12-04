@@ -13,14 +13,7 @@
             "required": [
                 "input"
             ],
-            "properties": {
-                "pipeline": {
-                    "type": "string",
-                    "description": "Pipeline to be benchmarked",
-                    "help_text": "You will need to include the pipeline under nf-benchmark/modules before running the pipeline. Use this parameter to specify its name as included in the path.",
-                    "fa_icon": "fas fa-file-code",                    
-                    "default": "./design.csv"
-                },
+            "properties": {                
                 "outdir": {
                     "type": "string",
                     "description": "Path to the output directory where the results will be saved.",
@@ -36,7 +29,58 @@
                 }
             }
         },
-        
+        "pipeline_options": {
+            "title": "Pipeline options",
+            "type": "object",
+            "fa_icon": "fas fa-fast-forward",
+            "description": "Options to configure the pipeline module.",
+            "properties": {
+                "pipeline": {
+                    "type": "string",
+                    "description": "Pipeline to be benchmarked",
+                    "help_text": "You will need to include the pipeline under pipeline_path before running the pipeline. Use this parameter to specify its name as included in the path.",
+                    "fa_icon": "fas fa-file-code",                    
+                    "default": ""
+                },
+                "pipeline_path": {
+                    "type": "string",                                        
+                    "description": "Path to the pipeline modules.",
+                    "help_text": "Use this parameter to specify a custom path to your pipelines.",
+                    "fa_icon": "fas fa-file-code",                    
+                    "default": "./modules/pipelines"
+                },
+                "test_nfb_path": {
+                    "type": "string",                                        
+                    "description": "Path to the test configuration path.",
+                    "help_text": "Use this parameter to specify a custom path to the pipeline test configuration.",
+                    "fa_icon": "fas fa-file-code",                                        
+                    "default": "${pipeline_path}/conf/test_nfb.config"
+
+                }              
+            }
+        },
+        "benchmarker_options": {
+            "title": "Benchmarker options",
+            "type": "object",
+            "fa_icon": "fas fa-fast-forward",
+            "description": "Options to configure the benchmarker module.",
+            "properties": {
+                "benchmarker": {
+                    "type": "string",
+                    "description": "Pipeline to be benchmarked",
+                    "help_text": "You will need to include the benchmarker under benchmarker_path before running the pipeline. Use this parameter to specify its name as included in the path.",
+                    "fa_icon": "fas fa-file-code",                    
+                    "default": ""
+                },
+                "benchmarker_path": {
+                    "type": "string",                                        
+                    "description": "Path to the benchmarker modules.",
+                    "help_text": "Use this parameter to specify a custom path to your benchmarkers.",
+                    "fa_icon": "fas fa-file-code",                    
+                    "default": "./modules/benchmarkers"
+                }              
+            }
+        },        
         "process_skipping_options": {
             "title": "Process skipping options",
             "type": "object",
@@ -45,8 +89,8 @@
             "properties": {            
                 "skip_benchmark": {
                     "type": "boolean",
-                    "description": "Use vst transformation instead of rlog with DESeq2.",
-                    "help_text": "See [DESeq2 docs](http://bioconductor.org/packages/devel/bioc/vignettes/DESeq2/inst/doc/DESeq2.html#data-transformations-and-visualization).",
+                    "description": "Skip the benchmark step.",
+                    "help_text": "Use this parameter to only run the pipeline step.",
                     "fa_icon": "fas fa-dolly"
                 }
             }

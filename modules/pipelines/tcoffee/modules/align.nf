@@ -9,7 +9,7 @@ params.output_format = 'fasta_aln'
 process align {
     tag {id}
     publishDir "${params.outdir}/tcoffee"
-    container 'quay.io/biocontainers/t_coffee:11.0.8--py27pl5.22.0_5'
+    container 'cbcrg/tcoffee@sha256:8894ba57a7ff34965d8febd51dcb7765b71314ca06893bc473d32e22032bf66f'
 
     input:
     tuple val (id), file (sequences)// , file (reference)

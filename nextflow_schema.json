@@ -49,12 +49,12 @@
                     "fa_icon": "fas fa-file-code",                    
                     "default": "./modules/pipelines"
                 },
-                "test_nfb_path": {
+                "pipeline_test_config": {
                     "type": "string",                                        
                     "description": "Path to the test configuration path.",
                     "help_text": "Use this parameter to specify a custom path to the pipeline test configuration.",
                     "fa_icon": "fas fa-file-code",                                        
-                    "default": "${pipeline_path}/conf/test_nfb.config"
+                    "default": "${pipeline_path}/conf/test.config"
 
                 }              
             }

@@ -36,7 +36,7 @@ class Checks {
     // Citation string
     private static String citation(workflow) {
         return "If you use ${workflow.manifest.name} for your analysis please cite:\n\n" +
-               "TODO\n"
+               "TODO: Include zenodo DOI here\n"
                //"* The pipeline\n" + 
                //"  https://doi.org/10.5281/zenodo.1400710\n\n" + //TODO
                //"* The nf-core framework\n" +

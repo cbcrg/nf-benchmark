@@ -62,12 +62,13 @@ The nf-benchmark documentation is split into the following files:
 ### From root
 
 ```bash
-NXF_VER=20.04.1-edge nextflow run main.nf \
+NXF_VER=20.11.0-edge nextflow run main.nf \
     --pipeline regressive_alignment \
     --regressive_align false \
     --align_methods CLUSTALO \
     --evaluate false \
-    -profile test,docker \
+    --skip_benchmark \
+    -profile nfb-test,nfb-docker \
     -resume
 ```
 
@@ -80,7 +81,7 @@ nextflow run main.nf --pipeline tcoffee --skip_benchmark -resume
 ```
 
 ```bash
-nextflow run main.nf --pipeline tcoffee --skip_benchmark -profile docker,test_nfb -ansi-log false -resume
+nextflow run main.nf --pipeline tcoffee --skip_benchmark -profile nfb-docker,nfb-test -ansi-log false -resume
 ```
 
 #### Regressive-alignment
@@ -89,7 +90,7 @@ nextflow run main.nf --pipeline tcoffee --skip_benchmark -profile docker,test_nf
 NXF_VER=20.04.1-edge nextflow run main.nf \
     --regressive_align true \
     --align_methods CLUSTALO \
-    -profile test,docker \
+    -profile nfb-test,nfb-docker \
     -resume
 ```
 
@@ -101,7 +102,7 @@ NXF_VER=20.04.1-edge nextflow run main.nf \
     --regressive_align false \
     --align_methods CLUSTALO \
     --evaluate false \
-    -profile test,docker
+    -profile nfb-test,nfb-docker
 ```
 
 #### Directly run regressive alignment pipeline
@@ -120,9 +121,15 @@ NXF_VER=20.04.1-edge nextflow run main.nf \
 make regressive | nextflow run main.nf \
     --pipeline regressive_alignment \
     --skip_benchmark \
-    -profile docker,test_nfb \
+    -profile nfb-docker,nfb-test \
     -ansi-log false \
     -resume
+```
+
+#### nfcore
+
+```bash
+NXF_VER=20.11.0-edge nextflow run main.nf --pipeline rnaseq -profile nfb-test,nfb-docker --skip_benchmark -stub-run
 ```
 
 ## declare workflow on main as pipeline  
@@ -179,3 +186,10 @@ The input and output data of benchmarkers can be found in **dataFormat2benchmark
 * edam_ref_data
 * edam_ref_format
    
+NXF_VER=20.10.0 nextflow run main.nf --pipeline tcoffee --skip_benchmark -profile nfb-test,nfb-docker
+
+NXF_VER=20.11.0-edge nextflow run main.nf --pipeline rnaseq -profile nfb-test,nfb-docker --skip_benchmark -resume -stub-run
+
+## Tags
+
+Tag #modified for things modified on `nf-core/rnaseq`

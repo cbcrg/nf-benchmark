@@ -10,5 +10,6 @@ modules/**/metainfo
 *.config.*
 test.nf
 TODOs.md
+issues_track.md
 
 

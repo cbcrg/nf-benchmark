@@ -13,7 +13,7 @@ params.sequences = "${projectDir}/test/sequences/BB11001.fa"
 params.outdir = './results'
 
 log.info """\
-         PIPELINE  ~  version 0.1"
+         tcoffee-module  ~  version 0.1"
          ======================================="
          Input sequences (FASTA)                        : ${params.sequences}
          """

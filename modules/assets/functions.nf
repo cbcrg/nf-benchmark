@@ -10,7 +10,7 @@ import org.yaml.snakeyaml.Yaml
 @Grab('com.xlson.groovycsv:groovycsv:1.0')
 // @Grab('com.xlson.groovycsv:groovycsv:1.3')// slower download
 import static com.xlson.groovycsv.CsvParser.parseCsv
-
+  
 /*
  ************
  * Functions
@@ -70,6 +70,25 @@ def setInputParam (path) {
 // benchmarkInfo currently is a CSV but could become a DBs or something else
 def setBenchmark (configYmlFile, benchmarkInfo, pipeline, input_field) {
 
+    
+    Map colors = [:]
+    c_yellow = "\033[0;32m"
+    c_green = params.monochrome_logs ? '' : "\033[0;32m";
+    c_purple = params.monochrome_logs ? '' : "\033[0;35m";
+    c_red = params.monochrome_logs ? '' : "\033[0;31m";
+    c_reset = params.monochrome_logs ? '' : "\033[0m";
+    colors['reset']       = "\033[0m"
+    colors['dim']         = "\033[2m"
+    colors['black']       = "\033[0;30m"
+    colors['green']       = "\033[0;32m"
+    colors['yellow']      =  "\033[0;33m"
+    colors['yellow_bold'] = "\033[1;93m"
+    colors['blue']        = "\033[0;34m"
+    colors['purple']      = "\033[0;35m"
+    colors['cyan']        = "\033[0;36m"
+    colors['white']       = "\033[0;37m"
+    colors['red']         = "\033[1;91m"
+    
     def fileYml = new File(configYmlFile)
     def yaml = new Yaml() //TODO change to use function readYml
     def pipelineConfig = yaml.load(fileYml.text)
@@ -115,11 +134,9 @@ def setBenchmark (configYmlFile, benchmarkInfo, pipeline, input_field) {
     higher_priority = benchmarkDict.keySet().min()
 
     if ( benchmarkDict.size() == 0 ) exit 1, "Error: No available benchmark for the selected pipeline  \"${params.pipeline}\" is not included in nf-benchmark"
-
+    
     if ( benchmarkDict.size() > 1 ) {
-        log.info """
-        [WARNING]: More than one possible benchmarker for \"${params.pipeline}\" pipeline benchmarker set to \"${benchmarkDict[higher_priority].benchmarker}\" (higher priority)
-        """.stripIndent()
+        log.info "-${colors.yellow}WARN: More than one possible benchmarker for \"${params.pipeline}\" pipeline benchmarker set to \"${benchmarkDict[higher_priority].benchmarker}\" (higher priority)${colors.reset}"
         benchmarkDict = benchmarkDict [ higher_priority ]
     }
 

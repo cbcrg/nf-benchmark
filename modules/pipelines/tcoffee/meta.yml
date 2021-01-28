@@ -13,7 +13,7 @@ pipeline:
             of more than two molecular sequences.
         homepage: http://www.tcoffee.org/
         documentation: http://www.tcoffee.org/Projects/tcoffee/index.html#DOCUMENTATION
-        edam_topic: topic_0091
+        edam_topic: topic_0080
         edam_operation: operation_0492
 input:
     -

@@ -10,7 +10,7 @@ import org.yaml.snakeyaml.Yaml
 @Grab('com.xlson.groovycsv:groovycsv:1.0')
 // @Grab('com.xlson.groovycsv:groovycsv:1.3')// slower download
 import static com.xlson.groovycsv.CsvParser.parseCsv
-  
+
 /*
  ************
  * Functions

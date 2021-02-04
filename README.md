@@ -61,6 +61,8 @@ The nf-benchmark documentation is split into the following files:
 
 ### From root
 
+* regressive without benchmarking
+
 ```bash
 NXF_VER=20.11.0-edge nextflow run main.nf \
     --pipeline regressive_alignment \
@@ -72,12 +74,42 @@ NXF_VER=20.11.0-edge nextflow run main.nf \
     -resume
 ```
 
+* Regressive with benchmarking
+
+```bash
+NXF_VER=20.11.0-edge nextflow run main.nf \
+    --pipeline regressive_alignment \
+    --regressive_align false \
+    --align_methods CLUSTALO \
+    --evaluate false \    
+    -profile nfb-test,nfb-docker \
+    -resume
+```
+
+```bash
+# 20210204 
+NXF_VER=20.11.0-edge nextflow run main.nf     --pipeline regressive_alignment     --regressive_align false     --align_methods CLUSTALO     --evaluate false  --pipeline_test_config $PWD/modules/pipelines/regressive_alignment/conf/test_nfb.config   -profile nfb-test,nfb-docker -resume
+
+# 20210205
+NXF_VER=20.11.0-edge nextflow run main.nf     --pipeline regressive_alignment     --regressive_align false     --align_methods CLUSTALO     --evaluate false  --pipeline_test_config $PWD/modules/pipelines/regressive_alignment/conf/test_nfb.config  --pipeline_output_name alignment_progressive -profile nfb-test,nfb-docker -resume
+```
+
+```bash
+NXF_VER=20.11.0-edge nextflow run main.nf \
+    --pipeline regressive_alignment \
+    --regressive_align true \
+    --align_methods CLUSTALO \
+    --evaluate false \
+    -profile nfb-test,nfb-docker \
+    -resume
+```
+
 ### From a module
 
 #### t-coffee
 
 ```bash
-nextflow run main.nf --pipeline tcoffee --skip_benchmark -resume
+NXF_VER=20.11.0-edge nextflow run main.nf --pipeline tcoffee --skip_benchmark -resume
 ```
 
 ```bash
@@ -87,9 +119,10 @@ nextflow run main.nf --pipeline tcoffee --skip_benchmark -profile nfb-docker,nfb
 #### Regressive-alignment
 
 ```bash
-NXF_VER=20.04.1-edge nextflow run main.nf \
+NXF_VER=20.11.0 nextflow run main.nf \
     --regressive_align true \
     --align_methods CLUSTALO \
+    --evaluate false \
     -profile nfb-test,nfb-docker \
     -resume
 ```
@@ -97,7 +130,7 @@ NXF_VER=20.04.1-edge nextflow run main.nf \
 * 2020/07/28 
 
 ```bash
-NXF_VER=20.04.1-edge nextflow run main.nf \
+NXF_VER=20.11.0 nextflow run main.nf \
     --pipeline regressive_alignment_new  \
     --regressive_align false \
     --align_methods CLUSTALO \

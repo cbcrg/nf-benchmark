@@ -16,22 +16,20 @@ reference_ch = Channel.fromPath( params.reference, checkIfExists: true ).map { i
 // Run the workflow
 workflow benchmark {
     take:
-      target_aln
-    // result
-    // result, path(ref)
+    target_aln
 
     main:
-      target_aln
-        .join ( reference_ch, by: [0] )
-        .ifEmpty { error "Cannot find any reference matching alignment for benchmarking" }
-        .set { target_and_ref }
+    target_aln
+      .join ( reference_ch, by: [0] )
+      .ifEmpty { error "Cannot find any reference matching alignment for benchmarking" }
+      .set { target_and_ref }
 
-      reformat_to_benchmark (target_and_ref)  \
-        | run_benchmark
-      //run_benchmark (target_and_ref)
+    reformat_to_benchmark (target_and_ref)  \
+      | run_benchmark
+    //run_benchmark (target_and_ref)
 
     emit:
-      run_benchmark.out
+    run_benchmark.out
 }
 
 workflow {

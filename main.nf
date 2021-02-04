@@ -1,7 +1,7 @@
 #!/usr/bin/env nextflow
 
 /*
- * Copyright (c) 2021 Centre for Genomic Regulation (CRG)
+ * Copyright (c) 2020-2021 Centre for Genomic Regulation (CRG)
  * and the authors, Jose Espinosa-Carrasco, Paolo Di Tommaso.
  *
  * Licensed to the Apache Software Foundation (ASF) under one
@@ -34,32 +34,16 @@
 
 nextflow.enable.dsl = 2
 
-import org.yaml.snakeyaml.Yaml
-
-@Grab('com.xlson.groovycsv:groovycsv:1.0')
-// @Grab('com.xlson.groovycsv:groovycsv:1.3')// slower download
-import static com.xlson.groovycsv.CsvParser.parseCsv
-
-/*
-log.info """\
-===================================
- N F - B E N C H M A R K
-===================================
-Pipeline: ${params.pipeline}
-"""
-*/
-
 ////////////////////////////////////////////////////
-/* -- PRINT HELP MESSAGE IF REQUIRED           -- */
+/* --               PRINT HELP                 -- */
 ////////////////////////////////////////////////////
 
-def json_schema = "$baseDir/nextflow_schema.json"
+def json_schema = "$projectDir/nextflow_schema.json"
 if (params.help) {
     def command = "nextflow run nf-benchmark --pipeline tcoffee profile docker,test_nfb"
     log.info Schema.params_help(workflow, params, json_schema, command)
     exit 0
 }
-
 
 ////////////////////////////////////////////////////
 /* --         PRINT PARAMETER SUMMARY          -- */
@@ -148,7 +132,9 @@ include { mean_benchmark_score } from "${baseDir}/modules/benchmarkers/mean_benc
 //The previous include should be a module included in the benchmark pipeline
 
 params.pipeline_output_name = false
-//params.pipeline_output_name = 'alignment_regressive'
+// params.pipeline_output_name = 'alignment_regressive'
+// params.pipeline_output_name = 'alignment_progressive'
+
 
 // TODO move to the correct place
 // Header log info
@@ -159,33 +145,23 @@ def summary = [:]
 workflow {
 
     pipeline()
-   
-    // By default take ".out" if provided (or exists) then used the named output (params.pipeline_output_name)
-    /*
-    if (!params.pipeline_output_name) {
-        output_to_benchmark = pipeline.out[0]
-    }
-    else {
-        output_to_benchmark = pipeline.out."$params.pipeline_output_name"
-    }
-    */
+    
+    // By default take ".out" if provided (or exists) then used the named output (params.pipeline_output_name)    
     if (!params.skip_benchmark) {
 
         // By default take ".out" if provided (or exists) then used the named output (params.pipeline_output_name)
         if (!params.pipeline_output_name) {
-            output_to_benchmark = pipeline.out[0]
+            output_to_benchmark = pipeline.out[1]          
         }
         else {
-            output_to_benchmark = pipeline.out."$params.pipeline_output_name"
+            output_to_benchmark = pipeline.out."$params.pipeline_output_name"                   
         }
-
+    
         log.info """
         Benchmark: ${infoBenchmark.benchmarker}
         """.stripIndent()
 
-        // benchmark (pipeline.out.alignment_regressive) // HERE USING NAMED OUTPUT
         benchmark (output_to_benchmark)
-        // benchmark (pipeline.out) //TODO reference should be a param
 
         benchmark.out \
              | map { it.text } \

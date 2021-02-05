@@ -1,41 +1,38 @@
 # nf-benchmark
 
-## Introduction:
+## Introduction
 
-nf-benchmark is a benchmarking tool based on nextflow DSL2 that allows to include your nextflow pipeline as a module for 
-its benchmarking.
+nf-benchmark is a benchmarking tool based on nextflow DSL2 that allows to include your nextflow pipeline as a module for its benchmarking.
 
 ## Quick start
 
 1. Install **Nextflow** following [this](https://www.nextflow.io/docs/latest/getstarted.html#installation) instructions.
 
-2. Install either [`Docker`](https://docs.docker.com/engine/installation/) or 
-[`Singularity`](https://www.sylabs.io/guides/3.0/user-guide/) to use the sandboxes images containing the software used 
-by the pipeline.
+2. Install either [`Docker`](https://docs.docker.com/engine/installation/) or [`Singularity`](https://www.sylabs.io/guides/3.0/user-guide/) to use the sandboxes images containing the software used by the pipeline.
 
 3. Clone the repository:
 
-```bash
-git clone https://github.com/cbcrg/nf-benchmark
-```
+    ```bash
+    git clone https://github.com/cbcrg/nf-benchmark
+    ```
 
 4. Run nf-benchmark
 
-```bash
-NXF_VER=20.11.0-edge nextflow run main.nf --pipeline tcoffee -profile docker,test_nfb -resume
-```
+    ```bash
+    nextflow run main.nf --pipeline tcoffee -profile docker,test_nfb -resume
+    ```
 
-## Add your pipeline 
+## Add your pipeline
 
 If you want to include your pipeline on nf-benchmark you just need to:
+
 * Place the pipeline under the `modules/pipelines` directory e.g. 'modules/pipelines/my_pipeline'
 * Create a `yml` file that includes some meta-information of your pipeline so that nf-benchmark can correctly run it. See
 the `tcoffee` pipeline example [here](https://github.com/cbcrg/nf-benchmark/blob/master/modules/pipelines/tcoffee/meta.yml)
-* Include a nextflow configuration file that should be named `test_nfb.config` and should be 
-placed under `modules/pipelines/my_pipeline/conf/`, find the tcoffee example on this 
-[link](https://github.com/cbcrg/nf-benchmark/blob/master/modules/pipelines/tcoffee/conf/test_nfb.config). This 
-configuration should at least provide a input dataset for testing purposes. If you follow these steps you should be able
-to run your pipeline under nf-benchmark using the following command: 
+* Include a nextflow configuration file that should be named `test_nfb.config` and should be
+placed under `modules/pipelines/my_pipeline/conf/`, find the tcoffee example on this
+[link](https://github.com/cbcrg/nf-benchmark/blob/master/modules/pipelines/tcoffee/conf/test_nfb.config). This
+configuration should at least provide a input dataset for testing purposes. If you follow these steps you should be able to run your pipeline under nf-benchmark using the following command:
 
     ```bash
     nextflow run main.nf --pipeline my_pipeline --skip_benchnmark -profile test_nfb -resume
@@ -43,7 +40,7 @@ to run your pipeline under nf-benchmark using the following command:
 
     Note that the `--pipeline` parameter design the name of the pipeline run.
 
-# nf-benchmark: Documentation
+## nf-benchmark Documentation
 
 The nf-benchmark documentation is split into the following files:
 
@@ -57,7 +54,6 @@ The nf-benchmark documentation is split into the following files:
 5. [Troubleshooting](https://nf-co.re/usage/troubleshooting)
 
 ## How to run the pipeline
-
 
 ### From root
 
@@ -113,7 +109,7 @@ NXF_VER=20.11.0-edge nextflow run main.nf --pipeline tcoffee --skip_benchmark -r
 ```
 
 ```bash
-NXF_VER=20.11.0-edge nextflow run main.nf --pipeline tcoffee --skip_benchmark -profile nfb-docker,nfb-test -ansi-log false -resume
+nextflow run main.nf --pipeline tcoffee --skip_benchmark -profile nfb-docker,nfb-test -ansi-log false -resume
 ```
 
 #### Regressive-alignment
@@ -127,7 +123,7 @@ NXF_VER=20.11.0 nextflow run main.nf \
     -resume
 ```
 
-* 2020/07/28 
+* 2020/07/28
 
 ```bash
 NXF_VER=20.11.0 nextflow run main.nf \
@@ -186,27 +182,26 @@ NXF_VER=20.04.1-edge nextflow run main.nf --regressive_align false --align_metho
 ### Include a test config
 
 If you want to use the test_nfb you should include a configuration file in pipelines/your_pipeline/conf/test_nfb.config
-Otherwise, you can use your own test file using -c option see 
+Otherwise, you can use your own test file using -c option see
 
-### Params:
+### Params
 
---params.pipeline 
+--params.pipeline
 
 --params.path_to_pipelines
 
 --params.path_to_benchmarks
 
-## Tables description:
+## Tables description
 
-### methods2benchmark:
+### methods2benchmark
 
-The **methods2benchmark.csv** table contains the relationship between the pipeline method, its data input output and 
-finally the benchmark, it contains the following fields:
+The **methods2benchmark.csv** table contains the relationship between the pipeline method, its data input output and finally the benchmark, it contains the following fields:
 
 * edam_operation
 * edam_input_data
 * edam_input_format
-* edam_output_data 
+* edam_output_data
 * edam_output_format
 * benchmarker
 
@@ -218,8 +213,8 @@ The input and output data of benchmarkers can be found in **dataFormat2benchmark
 * edam_test_format
 * edam_ref_data
 * edam_ref_format
-   
-NXF_VER=20.11.0-edge nextflow run main.nf --pipeline tcoffee --skip_benchmark -profile nfb-test,nfb-docker -resume
+
+NXF_VER=20.10.0 nextflow run main.nf --pipeline tcoffee --skip_benchmark -profile nfb-test,nfb-docker
 
 NXF_VER=20.11.0-edge nextflow run main.nf --pipeline rnaseq -profile nfb-test,nfb-docker --skip_benchmark -resume -stub-run
 

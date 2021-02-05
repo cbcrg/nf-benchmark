@@ -1,6 +1,6 @@
 # nf-core/benchmark: Output
 
-# TODO update file
+## TODO update file
 
 ## :warning: Please read this documentation on the nf-core website: [https://nf-co.re/benchmark/output](https://nf-co.re/benchmark/output)
 

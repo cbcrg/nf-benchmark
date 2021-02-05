@@ -22,7 +22,7 @@ git clone https://github.com/cbcrg/nf-benchmark
 4. Run nf-benchmark
 
 ```bash
-nextflow run main.nf --pipeline tcoffee -profile docker,test_nfb -resume
+NXF_VER=20.11.0-edge nextflow run main.nf --pipeline tcoffee -profile docker,test_nfb -resume
 ```
 
 ## Add your pipeline 
@@ -113,7 +113,7 @@ NXF_VER=20.11.0-edge nextflow run main.nf --pipeline tcoffee --skip_benchmark -r
 ```
 
 ```bash
-nextflow run main.nf --pipeline tcoffee --skip_benchmark -profile nfb-docker,nfb-test -ansi-log false -resume
+NXF_VER=20.11.0-edge nextflow run main.nf --pipeline tcoffee --skip_benchmark -profile nfb-docker,nfb-test -ansi-log false -resume
 ```
 
 #### Regressive-alignment
@@ -219,7 +219,7 @@ The input and output data of benchmarkers can be found in **dataFormat2benchmark
 * edam_ref_data
 * edam_ref_format
    
-NXF_VER=20.10.0 nextflow run main.nf --pipeline tcoffee --skip_benchmark -profile nfb-test,nfb-docker
+NXF_VER=20.11.0-edge nextflow run main.nf --pipeline tcoffee --skip_benchmark -profile nfb-test,nfb-docker -resume
 
 NXF_VER=20.11.0-edge nextflow run main.nf --pipeline rnaseq -profile nfb-test,nfb-docker --skip_benchmark -resume -stub-run
 

@@ -1,8 +1,8 @@
 {
     "$schema": "http://json-schema.org/draft-07/schema",
-    "$id": "https://raw.githubusercontent.com/nf-core/rnaseq/master/nextflow_schema.json",
-    "title": "nf-core/rnaseq pipeline parameters",
-    "description": "Nextflow RNA-Seq analysis pipeline, part of the nf-core community.",
+    "$id": "https://raw.githubusercontent.com/nf-core/benchmark/master/nextflow_schema.json",
+    "title": "nf-core/benchmark pipeline parameters",
+    "description": "Benchmarking pipeline",
     "type": "object",
     "definitions": {
         "input_output_options": {
@@ -13,7 +13,10 @@
             "required": [
                 "input"
             ],
-            "properties": {                
+            "properties": {
+                "input": {
+                    
+                },               
                 "outdir": {
                     "type": "string",
                     "description": "Path to the output directory where the results will be saved.",
@@ -48,6 +51,15 @@
                     "help_text": "Use this parameter to specify a custom path to your pipelines.",
                     "fa_icon": "fas fa-file-code",                    
                     "default": "./modules/pipelines"
+                },
+                "path_to_pipelines": {
+
+                },
+                "pipeline_config": {
+
+                },
+                "pipeline_output_name": {
+
                 },
                 "pipeline_test_config": {
                     "type": "string",                                        
@@ -219,6 +231,35 @@
                     "fa_icon": "fas fa-remove-format",
                     "hidden": true
                 },
+                "tracedir": {
+                    "type": "string",
+                    "description": "Directory to keep pipeline Nextflow logs and reports.",
+                    "default": "${params.outdir}/pipeline_info",
+                    "fa_icon": "fas fa-cogs",
+                    "hidden": true
+                },
+                "monochrome_logs": {
+                    "type": "boolean",
+                    "description": "Do not use coloured log outputs.",
+                    "fa_icon": "fas fa-palette",
+                    "hidden": true
+                },
+                "skip_multiqc": {
+                    "type": "boolean",
+                    "description": "Skip MultiQC.",
+                    "fa_icon": "fas fa-fast-forward"
+                },
+                "multiqc_config": {
+                    "type": "string",
+                    "description": "Custom config file to supply to MultiQC.",
+                    "fa_icon": "fas fa-cog",
+                    "hidden": true
+                },
+                "multiqc_title": {
+                    "type": "string",
+                    "description": "MultiQC report title. Printed as page header, used for filename if not otherwise specified.",
+                    "fa_icon": "fas fa-file-signature"
+                },
                 "max_multiqc_email_size": {
                     "type": "string",
                     "description": "File size limit when attaching MultiQC reports to summary emails.",
@@ -232,19 +273,6 @@
                     "fa_icon": "fas fa-palette",
                     "hidden": true
                 },
-                "multiqc_config": {
-                    "type": "string",
-                    "description": "Custom config file to supply to MultiQC.",
-                    "fa_icon": "fas fa-cog",
-                    "hidden": true
-                },
-                "tracedir": {
-                    "type": "string",
-                    "description": "Directory to keep pipeline Nextflow logs and reports.",
-                    "default": "${params.outdir}/pipeline_info",
-                    "fa_icon": "fas fa-cogs",
-                    "hidden": true
-                },
                 "clusterOptions": {
                     "type": "string",
                     "description": "Arguments passed to Nextflow clusterOptions.",
@@ -256,6 +284,13 @@
                     "description": "Run this workflow with Conda. You can also use '-profile conda' instead of providing this parameter.",
                     "hidden": true,
                     "fa_icon": "fas fa-bacon"
+                },
+                "singularity_pull_docker_container": {
+                    "type": "boolean",
+                    "description": "Instead of directly downloading Singularity images for use with Singularity, force the workflow to pull and convert Docker containers instead.",
+                    "hidden": true,
+                    "fa_icon": "fas fa-toolbox",
+                    "help_text": "This may be useful for example if you are unable to directly pull Singularity containers to run the pipeline due to http/https proxy issues."
                 }
             }
         }
@@ -265,23 +300,11 @@
             "$ref": "#/definitions/input_output_options"
         },
         {
-            "$ref": "#/definitions/umi_options"
+            "$ref": "#/definitions/pipeline_options"
         },
         {
-            "$ref": "#/definitions/read_filtering_options"
-        },
-        {
-            "$ref": "#/definitions/reference_genome_options"
-        },
-        {
-            "$ref": "#/definitions/read_trimming_options"
-        },
-        {
-            "$ref": "#/definitions/alignment_options"
-        },
-        {
-            "$ref": "#/definitions/read_counting_options"
-        },
+            "$ref": "#/definitions/benchmarker_options"
+        },        
         {
             "$ref": "#/definitions/process_skipping_options"
         },

@@ -153,7 +153,7 @@ include { PIPELINE } from pipeline_module params(params)
 if (!params.skip_benchmark) {
     include { BENCHMARK } from benchmark_module params(params)
 }
-include { mean_benchmark_score } from "${projectDir}/modules/benchmarkers/mean_benchmark_score/main.nf" //TODO make it generic
+include { MEAN_BENCHMARK_SCORE } from "${projectDir}/modules/benchmarkers/mean_benchmark_score/main.nf" //TODO make it generic
 //The previous include should be a module included in the benchmark pipeline
 
 
@@ -203,7 +203,7 @@ workflow {
              | collectFile (name: 'scores.csv', newLine: false) \
              | set { scores }
         // TODO: output sometimes could be more than just a single score, refactor to be compatible with these cases
-        mean_benchmark_score(scores) | view
+        MEAN_BENCHMARK_SCORE(scores) | view
     }
 
     /*

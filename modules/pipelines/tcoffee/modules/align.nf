@@ -6,7 +6,7 @@ params.outdir = ''
 // params.output_format = 'msf'
 params.output_format = 'fasta_aln'
 
-process align {
+process ALIGN {
     tag {id}
     publishDir "${params.outdir}/tcoffee"
     container 'cbcrg/tcoffee@sha256:8894ba57a7ff34965d8febd51dcb7765b71314ca06893bc473d32e22032bf66f'

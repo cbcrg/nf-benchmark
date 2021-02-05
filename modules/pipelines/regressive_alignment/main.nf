@@ -181,7 +181,7 @@ dynamicX = params.dynamicX.toString().tokenize(',')       //int to string
 /*
  * main script flow
  */
-workflow pipeline {
+workflow PIPELINE {
 
     def trees = params.trees? input_trees : TREE_GENERATION (seqs_ch, tree_method).trees
 
@@ -230,7 +230,7 @@ workflow pipeline {
 }
 
 workflow {
-  pipeline()
+  PIPELINE()
 }
 
 /* 

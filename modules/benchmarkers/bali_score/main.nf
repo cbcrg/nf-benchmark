@@ -7,14 +7,14 @@
 
 params.reference = ""
 
-include { reformat as reformat_to_benchmark }  from "${moduleDir}/modules/reformat.nf"
-include { run_benchmark } from "${moduleDir}/modules/run_benchmark.nf"
+include { REFORMAT as REFORMAT_TO_BENCHMARK }  from "${moduleDir}/modules/reformat.nf"
+include { RUN_BENCHMARK } from "${moduleDir}/modules/run_benchmark.nf"
 
 // Set sequences channel
 reference_ch = Channel.fromPath( params.reference, checkIfExists: true ).map { item -> [ item.baseName, item ] }
 
 // Run the workflow
-workflow benchmark {
+workflow BENCHMARK {
     take:
     target_aln
 
@@ -24,14 +24,14 @@ workflow benchmark {
       .ifEmpty { error "Cannot find any reference matching alignment for benchmarking" }
       .set { target_and_ref }
 
-    reformat_to_benchmark (target_and_ref)  \
-      | run_benchmark
-    //run_benchmark (target_and_ref)
+    REFORMAT_TO_BENCHMARK (target_and_ref)  \
+      | RUN_BENCHMARK
+    //RUN_BENCHMARK (target_and_ref)
 
     emit:
-    run_benchmark.out
+    RUN_BENCHMARK.out
 }
 
 workflow {
-  benchmark()
+  BENCHMARK()
 }

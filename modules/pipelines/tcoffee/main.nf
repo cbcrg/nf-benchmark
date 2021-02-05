@@ -22,23 +22,23 @@ log.info """\
 // Set sequences channel
 sequences_ch = Channel.fromPath( params.sequences, checkIfExists: true ).map { item -> [ item.baseName, item ] }
 
-include { align } from "${moduleDir}/modules/align.nf"
-// include { reformat } from "${baseDir}/modules/tcoffee/reformat.nf"
+include { ALIGN } from "${moduleDir}/modules/align.nf"
+// include { REFORMAT } from "${baseDir}/modules/tcoffee/reformat.nf"
 
 // Run the workflow
-workflow pipeline {
+workflow PIPELINE {
     main:
     // Channel.from(params.ref_data) \
-    // align (params.ref_data) \
+    // ALIGN (params.ref_data) \
 
-    align (sequences_ch) //\
+    ALIGN (sequences_ch) //\
     //  | reformat
 
     emit:
-    // align.out
-    alignment = align.out
+    // ALIGN.out
+    alignment = ALIGN.out
 }
 
 workflow {
-  pipeline()
+  PIPELINE()
 }

@@ -57,8 +57,33 @@ ChecksNfb.check_profiles(params, workflow, log)
 ChecksNfb.check_pipeline_config(params, log)
 
 ////////////////////////////////////////////////////
+/* --          PARAMETER CHECKS                -- */
+////////////////////////////////////////////////////
+
+// Check that conda channels are set-up correctly
+if (params.enable_conda) {
+    Checks.check_conda_channels(log)
+}
+
+// Check AWS batch settings
+Checks.aws_batch(workflow, params)
+
+// Check the hostnames against configured profiles
+Checks.hostname(workflow, params, log)
+
+// Check genome key exists if provided
+// Checks.genome_exists(params, log)
+
+////////////////////////////////////////////////////
 /* --          VALIDATE INPUTS                 -- */
 ////////////////////////////////////////////////////
+
+// checkPathParamList = [ params.input, params.multiqc_config, params.fasta ]
+// for (param in checkPathParamList) { if (param) { file(param, checkIfExists: true) } }
+
+// Check mandatory parameters
+// if (params.input) { ch_input = file(params.input) } else { exit 1, 'Input samplesheet not specified!' }
+// if (params.fasta) { ch_fasta = file(params.fasta) } else { exit 1, 'Genome fasta file not specified!' }
 
 pipeline_module = file( "${params.pipeline_path}/main.nf" )
 if( !pipeline_module.exists() ) exit 1, "ERROR: The selected pipeline is not correctly included in nf-benchmark: ${params.pipeline}"
@@ -110,26 +135,33 @@ if (!params.skip_benchmark) {
     params[input_benchmark_param] = ref_data
 }
 
-/*
- * Hardcodes for testing - aligment BB11001 // #del
- */
-// params[input_pipeline_param] = "${baseDir}/reference_dataset/BB11001.fa"
-// params['reference'] = "${baseDir}/reference_dataset/BB11001.xml"
-// benchmarker = "bali_base"
+////////////////////////////////////////////////////
+/* --          CONFIG FILES                    -- */
+////////////////////////////////////////////////////
+
+ch_multiqc_config        = file("$projectDir/assets/multiqc_config.yaml", checkIfExists: true)
+ch_multiqc_custom_config = params.multiqc_config ? Channel.fromPath(params.multiqc_config) : Channel.empty()
+
+////////////////////////////////////////////////////
+/* --       IMPORT MODULES / SUBWORKFLOWS      -- */
+////////////////////////////////////////////////////
+
+// pipeline is the generic name
+// hacer un wrapper por encima?
+include { PIPELINE } from pipeline_module params(params)
+
+if (!params.skip_benchmark) {
+    include { BENCHMARK } from benchmark_module params(params)
+}
+include { mean_benchmark_score } from "${projectDir}/modules/benchmarkers/mean_benchmark_score/main.nf" //TODO make it generic
+//The previous include should be a module included in the benchmark pipeline
+
+
 
 ////////////////////////////////////////////////////
 /* --           RUN MAIN WORKFLOW              -- */
 ////////////////////////////////////////////////////
 
-// pipeline is the generic name
-// hacer un wrapper por encima?
-include { pipeline } from pipeline_module params(params)
-
-if (!params.skip_benchmark) {
-    include { benchmark } from benchmark_module params(params)
-}
-include { mean_benchmark_score } from "${baseDir}/modules/benchmarkers/mean_benchmark_score/main.nf" //TODO make it generic
-//The previous include should be a module included in the benchmark pipeline
 
 params.pipeline_output_name = false
 // params.pipeline_output_name = 'alignment_regressive'
@@ -141,34 +173,58 @@ params.pipeline_output_name = false
 
 def summary = [:]
 
+// Info required for completion email and summary
+def multiqc_report = []
+
 // Run the workflow
 workflow {
 
-    pipeline()
+    PIPELINE()
     
     // By default take ".out" if provided (or exists) then used the named output (params.pipeline_output_name)    
     if (!params.skip_benchmark) {
 
         // By default take ".out" if provided (or exists) then used the named output (params.pipeline_output_name)
         if (!params.pipeline_output_name) {
-            output_to_benchmark = pipeline.out[1]          
+            output_to_benchmark = PIPELINE.out[1]          
         }
         else {
-            output_to_benchmark = pipeline.out."$params.pipeline_output_name"                   
+            output_to_benchmark = PIPELINE.out."$params.pipeline_output_name"                   
         }
     
         log.info """
         Benchmark: ${infoBenchmark.benchmarker}
         """.stripIndent()
 
-        benchmark (output_to_benchmark)
+        BENCHMARK (output_to_benchmark)
 
-        benchmark.out \
+        BENCHMARK.out \
              | map { it.text } \
              | collectFile (name: 'scores.csv', newLine: false) \
              | set { scores }
         // TODO: output sometimes could be more than just a single score, refactor to be compatible with these cases
         mean_benchmark_score(scores) | view
+    }
+
+    /*
+     * MultiQC
+     */  
+    if (!params.skip_multiqc) {
+        workflow_summary    = Schema.params_summary_multiqc(workflow, summary_params)
+        ch_workflow_summary = Channel.value(workflow_summary)
+
+        ch_multiqc_files = Channel.empty()
+        ch_multiqc_files = ch_multiqc_files.mix(Channel.from(ch_multiqc_config))
+        ch_multiqc_files = ch_multiqc_files.mix(ch_multiqc_custom_config.collect().ifEmpty([]))
+        ch_multiqc_files = ch_multiqc_files.mix(ch_workflow_summary.collectFile(name: 'workflow_summary_mqc.yaml'))
+        ch_multiqc_files = ch_multiqc_files.mix(GET_SOFTWARE_VERSIONS.out.yaml.collect())
+        ch_multiqc_files = ch_multiqc_files.mix(FASTQC.out.zip.collect{it[1]}.ifEmpty([]))
+        
+        MULTIQC (
+            ch_multiqc_files.collect()
+        )
+        multiqc_report       = MULTIQC.out.report.toList()
+        ch_software_versions = ch_software_versions.mix(MULTIQC.out.version.ifEmpty(null))
     }
 
 }
@@ -178,10 +234,10 @@ workflow {
 ////////////////////////////////////////////////////
 
 // Before uncomment include Completion.groovy into lib folder!!!
-// workflow.onComplete {
-//     Completion.email(workflow, params, params.summary_params, projectDir, log, multiqc_report, fail_percent_mapped)
-//     Completion.summary(workflow, params, log, fail_percent_mapped, pass_percent_mapped)
-// }
+workflow.onComplete {
+    Completion.email(workflow, params, summary_params, projectDir, log, multiqc_report)
+    Completion.summary(workflow, params, log)
+}
 
 ////////////////////////////////////////////////////
 /* --                  THE END                 -- */

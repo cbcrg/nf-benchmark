@@ -136,7 +136,7 @@ def setBenchmark (configYmlFile, benchmarkInfo, pipeline, input_field) {
     if ( benchmarkDict.size() == 0 ) exit 1, "Error: No available benchmark for the selected pipeline  \"${params.pipeline}\" is not included in nf-benchmark"
     
     if ( benchmarkDict.size() > 1 ) {
-        log.info "-${colors.yellow}WARN: More than one possible benchmarker for \"${params.pipeline}\" pipeline benchmarker set to \"${benchmarkDict[higher_priority].benchmarker}\" (higher priority)${colors.reset}"
+        log.info "${colors.yellow}WARN: More than one possible benchmarker for \"${params.pipeline}\" pipeline benchmarker set to \"${benchmarkDict[higher_priority].benchmarker}\" (higher priority)${colors.reset}"
         benchmarkDict = benchmarkDict [ higher_priority ]
     }
 

@@ -14,7 +14,10 @@ jobs:
       matrix:
         # Nextflow versions: check pipeline minimum and current latest
         nxf_ver: ['20.11.0-edge']
-        paramPipeline: ['--pipeline tcoffee --skip_benchmark']
+        paramPipeline: 
+          - '--pipeline'
+          - '--tcoffee'
+          - '--skip_benchmark'          
     steps:
       # Check out the repository
       - uses: actions/checkout@v2
@@ -30,7 +33,7 @@ jobs:
           sudo mv nextflow /usr/local/bin/
       - name: Run pipeline as a demo with tcoffee as the pipeline and balibase as the benchmarker
         run: |
-          nextflow run ${GITHUB_WORKSPACE} ${{matrix.paramPipeline}} -profile nfb-test,nfb-docker
+          nextflow run ${GITHUB_WORKSPACE} -profile nfb-test,nfb-docker ${{ matrix.paramPipeline }}
 
   test_regressive_alignment:
     env:
@@ -42,7 +45,13 @@ jobs:
       matrix:
         # Nextflow versions: check pipeline minimum and current latest
         nxf_ver: ['20.11.0-edge']
-        paramPipeline: ['--pipeline regressive_alignment --pipeline_test_config ./modules/pipelines/regressive_alignment/conf/test_nfb.config --skip_benchmark --align_methods CLUSTALO  --regressive_align false --evaluate false']
+        paramPipeline: 
+          - '--pipeline regressive_alignment'
+          - '--pipeline_test_config ./modules/pipelines/regressive_alignment/conf/test_nfb.config'
+          - '--skip_benchmark'
+          - '--align_methods CLUSTALO'
+          - '--regressive_align false' 
+          - '--evaluate false'
     steps:
       # Check out the repository
       - uses: actions/checkout@v2
@@ -58,4 +67,4 @@ jobs:
           sudo mv nextflow /usr/local/bin/
       - name: Runs regressive_alignment pipeline on test mode
         run: |
-          nextflow run ${GITHUB_WORKSPACE} ${{matrix.paramPipeline}} -profile nfb-test,nfb-docker
+          nextflow run ${GITHUB_WORKSPACE} -profile nfb-test,nfb-docker ${{matrix.paramPipeline}}

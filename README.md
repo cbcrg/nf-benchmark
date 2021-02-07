@@ -84,10 +84,24 @@ NXF_VER=20.11.0-edge nextflow run main.nf \
 
 ```bash
 # 20210204 
-NXF_VER=20.11.0-edge nextflow run main.nf     --pipeline regressive_alignment     --regressive_align false     --align_methods CLUSTALO     --evaluate false  --pipeline_test_config $PWD/modules/pipelines/regressive_alignment/conf/test_nfb.config   -profile nfb-test,nfb-docker -resume
+NXF_VER=20.11.0-edge nextflow run main.nf \
+    --pipeline regressive_alignment \
+    --regressive_align false \
+    --align_methods CLUSTALO \
+    --evaluate false \
+    --pipeline_test_config $PWD/modules/pipelines/regressive_alignment/conf/test_nfb.config \
+    -profile nfb-test,nfb-docker \
+    -resume
 
 # 20210205
-NXF_VER=20.11.0-edge nextflow run main.nf     --pipeline regressive_alignment     --regressive_align false     --align_methods CLUSTALO     --evaluate false  --pipeline_test_config $PWD/modules/pipelines/regressive_alignment/conf/test_nfb.config  --pipeline_output_name alignment_progressive -profile nfb-test,nfb-docker -resume
+NXF_VER=20.11.0-edge nextflow run main.nf \
+    --pipeline regressive_alignment \     
+    --regressive_align false \
+    --align_methods CLUSTALO \
+    --evaluate false \
+    --pipeline_test_config $PWD/modules/pipelines/regressive_alignment/conf/test_nfb.config  --pipeline_output_name alignment_progressive \
+    -profile nfb-test,nfb-docker \
+    -resume
 ```
 
 ```bash
@@ -105,11 +119,19 @@ NXF_VER=20.11.0-edge nextflow run main.nf \
 #### t-coffee
 
 ```bash
-NXF_VER=20.11.0-edge nextflow run main.nf --pipeline tcoffee --skip_benchmark -resume
+NXF_VER=20.11.0-edge nextflow run main.nf \
+    --pipeline tcoffee \
+    --skip_benchmark \
+    -resume
 ```
 
 ```bash
-nextflow run main.nf --pipeline tcoffee --skip_benchmark -profile nfb-docker,nfb-test -ansi-log false -resume
+nextflow run main.nf \
+    --pipeline tcoffee \
+    --skip_benchmark \
+    -profile nfb-docker,nfb-test \
+    -ansi-log false \
+    -resume
 ```
 
 #### Regressive-alignment
@@ -158,13 +180,21 @@ make regressive | nextflow run main.nf \
 #### nfcore
 
 ```bash
-NXF_VER=20.11.0-edge nextflow run main.nf --pipeline rnaseq -profile nfb-test,nfb-docker --skip_benchmark -stub-run
+NXF_VER=20.11.0-edge nextflow run main.nf \
+    --pipeline rnaseq \
+    -profile nfb-test,nfb-docker \
+    --skip_benchmark \
+    -stub-run
 ```
 
 ## declare workflow on main as pipeline  
 
 ```bash
-NXF_VER=20.04.1-edge nextflow run main.nf --regressive_align false --align_methods "CLUSTALO" --evaluate false -profile test,docker -resume
+NXF_VER=20.04.1-edge nextflow run main.nf \
+    --regressive_align false \
+    --align_methods "CLUSTALO" \--evaluate false \
+    -profile test,docker \
+    -resume
 ```
 
 ## Points to add to the documentation
@@ -198,21 +228,21 @@ Otherwise, you can use your own test file using -c option see
 
 The **methods2benchmark.csv** table contains the relationship between the pipeline method, its data input output and finally the benchmark, it contains the following fields:
 
-* edam_operation
-* edam_input_data
-* edam_input_format
-* edam_output_data
-* edam_output_format
-* benchmarker
+* `edam_operation`
+* `edam_input_data`
+* `edam_input_format`
+* `edam_output_data`
+* `edam_output_format`
+* `benchmarker`
 
 The input and output data of benchmarkers can be found in **dataFormat2benchmark.csv**. The fields of the table are:
 
-* benchmarker
-* edam_operation
-* edam_test_data
-* edam_test_format
-* edam_ref_data
-* edam_ref_format
+* `benchmarker`
+* `edam_operation`
+* `edam_test_data`
+* `edam_test_format`
+* `edam_ref_data`
+* `edam_ref_format`
 
 NXF_VER=20.10.0 nextflow run main.nf --pipeline tcoffee --skip_benchmark -profile nfb-test,nfb-docker
 

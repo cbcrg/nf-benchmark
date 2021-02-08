@@ -59,6 +59,7 @@ The nf-benchmark documentation is split into the following files:
 
 * regressive without benchmarking
 
+
 ```bash
 NXF_VER=20.11.0-edge nextflow run main.nf \
     --pipeline regressive_alignment \

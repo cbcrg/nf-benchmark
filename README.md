@@ -83,7 +83,7 @@ NXF_VER=20.11.0-edge nextflow run main.nf \
 ```
 
 ```bash
-# 20210204 
+# 20210204 Regressive with benchmark output channel default
 NXF_VER=20.11.0-edge nextflow run main.nf \
     --pipeline regressive_alignment \
     --regressive_align false \
@@ -93,7 +93,7 @@ NXF_VER=20.11.0-edge nextflow run main.nf \
     -profile nfb-test,nfb-docker \
     -resume
 
-# 20210205
+# 20210205  Regressive with benchmark output channel explicit
 NXF_VER=20.11.0-edge nextflow run main.nf \
     --pipeline regressive_alignment \     
     --regressive_align false \

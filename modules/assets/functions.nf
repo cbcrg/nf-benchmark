@@ -160,7 +160,7 @@ def setBenchmark (configYmlFile, benchmarkInfo, pipeline, input_field) {
  * refDataCsv    = Path to table containing the relationship between pipeline input, output and the corresponding benchmarker
  * skipReference = When set to true do not return reference data
  */
-def getData (benchmarkInfo, refDataCsv, skipReference) {
+def getData (benchmarkInfo, refDataCsv, skipReference, defDataPath) {
 
     def refData = readCsv(refDataCsv)
 
@@ -169,6 +169,7 @@ def getData (benchmarkInfo, refDataCsv, skipReference) {
     def dataIds  = []
     def pipelineInputList  = []
     def refBenchmarkerList  = []
+    // def path_to_refData = "${baseDir}/reference_dataset/"
 
     for ( row in refData ) {
         if ( row.benchmarker           == benchmarkInfo.benchmarker &&
@@ -179,8 +180,8 @@ def getData (benchmarkInfo, refDataCsv, skipReference) {
              pipeline_input_file = id + row.test_data_format
              ref_file  = id + row.ref_data_format
 
-             pipelineInputList.add ("${baseDir}/reference_dataset/" + pipeline_input_file)
-             refBenchmarkerList.add ("${baseDir}/reference_dataset/" + ref_file)
+             pipelineInputList.add (defDataPath + pipeline_input_file)
+             refBenchmarkerList.add (defDataPath + ref_file)
 
              dataIds.add ( id )
         }

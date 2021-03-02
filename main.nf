@@ -127,7 +127,12 @@ else {
 }
 
 // Set input and reference data sets
-(input_data, ref_data)  = getData (infoBenchmark, csvPathReference, params.skip_benchmark)
+(input_data, ref_data)  = getData (infoBenchmark, 
+                                   csvPathReference, 
+                                   params.skip_benchmark, 
+                                   params.path_to_refData)
+println (input_data)
+// return
 
 params[input_pipeline_param] = input_data
 
@@ -242,3 +247,23 @@ workflow.onComplete {
 ////////////////////////////////////////////////////
 /* --                  THE END                 -- */
 ////////////////////////////////////////////////////
+
+/*
+'tower' {
+      params.path_to_refData = 's3://cbcrg-eu/nf-benchmark-test-data'
+      aws.batch.cliPath      = '/usr/local/bin/aws'
+      params.outdir          = 's3://cbcrg-eu/results_nf-benchmark'
+      params.tracedir        = "${params.outdir}/pipeline_info"      
+    }
+    'batch' {
+      params.path_to_refData = 's3://cbcrg-eu/nf-benchmark-test-data'
+      process.container      = 'quay.io/nextflow/rnaseq-nf:latest' 
+      process.executor       = 'awsbatch'
+      process.queue          = 'jose_batch_test'
+      workDir                = 's3://cbcrg-eu/work'
+      aws.region             = 'eu-west-1'
+      aws.batch.cliPath      = '/usr/local/bin/aws'
+      params.outdir          = 's3://cbcrg-eu/results_nf-benchmark'
+      params.tracedir        = "${params.outdir}/pipeline_info"
+    }
+*/

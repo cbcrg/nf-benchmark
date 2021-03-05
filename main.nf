@@ -132,6 +132,7 @@ else {
                                    params.skip_benchmark, 
                                    params.path_to_refData)
 println (input_data)
+println (ref_data)
 // return
 
 params[input_pipeline_param] = input_data
@@ -191,9 +192,10 @@ workflow {
 
         // By default take ".out" if provided (or exists) then used the named output (params.pipeline_output_name)
         if (!params.pipeline_output_name) {
-            output_to_benchmark = PIPELINE.out[1]          
+            output_to_benchmark = PIPELINE.out[1]
+            // PIPELINE.out[0].view() //tcoffee            
         }
-        else {
+        else {            
             output_to_benchmark = PIPELINE.out."$params.pipeline_output_name"                   
         }
     
@@ -203,12 +205,14 @@ workflow {
 
         BENCHMARK (output_to_benchmark)
 
-        BENCHMARK.out \
-             | map { it.text } \
-             | collectFile (name: 'scores.csv', newLine: false) \
-             | set { scores }
-        // TODO: output sometimes could be more than just a single score, refactor to be compatible with these cases
-        MEAN_BENCHMARK_SCORE(scores) | view
+        // BENCHMARK.out \
+        //      | map { it.text } \
+        //      | collectFile (name: 'scores.csv', newLine: false) \
+        //      | set { scores }
+        // // TODO: output sometimes could be more than just a single score, refactor to be compatible with these cases
+        // MEAN_BENCHMARK_SCORE(scores) | view
+        emit:
+        BENCHMARK.out
     }
 
     /*

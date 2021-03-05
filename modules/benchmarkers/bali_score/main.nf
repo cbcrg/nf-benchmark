@@ -24,12 +24,14 @@ workflow BENCHMARK {
       .ifEmpty { error "Cannot find any reference matching alignment for benchmarking" }
       .set { target_and_ref }
 
-    REFORMAT_TO_BENCHMARK (target_and_ref)  \
-      | RUN_BENCHMARK
+    REFORMAT_TO_BENCHMARK (target_and_ref)
+    // REFORMAT_TO_BENCHMARK (target_and_ref)  \
+    //   | RUN_BENCHMARK
     //RUN_BENCHMARK (target_and_ref)
 
     emit:
-    RUN_BENCHMARK.out
+    // RUN_BENCHMARK.out
+    REFORMAT_TO_BENCHMARK.out
 }
 
 workflow {

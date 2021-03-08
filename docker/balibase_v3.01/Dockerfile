@@ -1,48 +1,37 @@
 FROM pditommaso/dkrbase:1.2
-MAINTAINER Jose Espinosa-Carrasco <espinosacarrascoj@gmail.com>
+LABEL maintainer="Jose Espinosa-Carrasco <espinosacarrascoj@gmail.com>"
 
 #Install MView for file-format conversion
 
 RUN apt-get install unzip
 
-RUN cd /usr/local/ &&\
-# RUN cd /opt/ &&\
- wget -q https://github.com/desmid/mview/archive/master.zip &&\
- unzip master.zip &&\
- rm -rf master.zip &&\
-#  mv mview-master mview &&\
-#  cd mview &&\
- cd mview-master &&\
+ENV MV_VERSION=1.67
+
+RUN cd /opt/ &&\
+ wget -q https://github.com/desmid/mview/archive/v$MV_VERSION.zip &&\
+ unzip v${MV_VERSION} &&\
+ rm -rf v${MV_VERSION}.zip &&\
+ cd mview-${MV_VERSION} &&\
  sed -i -- 's/#\!\/usr\/bin\/env perl/\#\!\/usr\/bin\/perl/g' bin/mview &&\
- # sed -i -- 's/\/home\/brown\/HOME\/work\/MView\/dev/\/usr\/local\/mview-master\/lib/g' bin/mview
-#  sed -i -- 's/\/home\/brown\/HOME\/work\/MView\/dev/\/opt\/mview/g' bin/mview
-#  sed -i -- 's/\/home\/brown\/HOME\/work\/MView\/dev/\/opt\/mview-master/g' bin/mview 
- sed -i -- 's/\/home\/brown\/HOME\/work\/MView\/dev/\/usr\/local\/mview-master/g' bin/mview 
+ sed -i -- "s/\/home\/brown\/HOME\/work\/MView\/dev/\/opt\/mview-${MV_VERSION}/g" bin/mview 
 
-# RUN chmod +x /opt/mview/bin/mview
+ENV PATH "$PATH:/opt/mview-${MV_VERSION}/bin"
 
-# ENV PATH=/opt/mview/bin:$PATH
-ENV PATH=/usr/local/mview-master/bin:$PATH
-
-# ENV PATH /usr/local/bin:$PATH
-
-
-# #Install bali_score
-
-# RUN wget -q http://www.lbgi.fr/balibase/BalibaseDownload/BAliBASE_R1-5.tar.gz &&\
-#  tar xf BAliBASE_R1-5.tar.gz &&\
-#  rm -rf BAliBASE_R1-5.tar.gz &&\
-#  cd bb3_release/bali_score_src && \
-#  rm -rf expat-1.95.2 &&\
-# # wget -q https://sourceforge.net/projects/expat/files/expat/2.0.1/expat-2.0.1.tar.gz/download &&\
-#  curl -L -o expat-2.0.1.tar.gz  https://sourceforge.net/projects/expat/files/expat/2.0.1/expat-2.0.1.tar.gz/download?use_mirror=netix &&\
-#  gunzip expat-2.0.1.tar.gz &&\
-#  tar xf expat-2.0.1.tar &&\
-#  sed -i -- 's/expat-1.95.2/expat-2.0.1/g' makefile &&\
-#  make &&\
-#  cp bali_score /usr/local/bin &&\
-#  cd ../.. &&\
-#  rm -rf bb3_release
+#Install bali_score
+RUN wget -q http://www.lbgi.fr/balibase/BalibaseDownload/BAliBASE_R1-5.tar.gz &&\
+ tar xf BAliBASE_R1-5.tar.gz &&\
+ rm -rf BAliBASE_R1-5.tar.gz &&\
+ cd bb3_release/bali_score_src && \
+ rm -rf expat-1.95.2 &&\
+# wget -q https://sourceforge.net/projects/expat/files/expat/2.0.1/expat-2.0.1.tar.gz/download &&\
+ curl -L -o expat-2.0.1.tar.gz  https://sourceforge.net/projects/expat/files/expat/2.0.1/expat-2.0.1.tar.gz/download?use_mirror=netix &&\
+ gunzip expat-2.0.1.tar.gz &&\
+ tar xf expat-2.0.1.tar &&\
+ sed -i -- 's/expat-1.95.2/expat-2.0.1/g' makefile &&\
+ make &&\
+ cp bali_score /usr/local/bin &&\
+ cd ../.. &&\
+ rm -rf bb3_release
 
 # # RUN wget -q http://www.lbgi.fr/balibase/BalibaseDownload/BAliBASE_R1-5.tar.gz
 # # RUN tar xf BAliBASE_R1-5.tar.gz

@@ -36,8 +36,7 @@ workflow PIPELINE {
 
     emit:
     // ALIGN.out
-    alignment = ALIGN.out[0]
-    log_a = ALIGN.out[1]
+    alignment = ALIGN.out    
 }
 
 workflow {

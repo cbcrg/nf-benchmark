@@ -5,20 +5,25 @@ MAINTAINER Jose Espinosa-Carrasco <espinosacarrascoj@gmail.com>
 
 RUN apt-get install unzip
 
-# RUN cd /usr/local/ &&\
-RUN cd /opt/ &&\
+RUN cd /usr/local/ &&\
+# RUN cd /opt/ &&\
  wget -q https://github.com/desmid/mview/archive/master.zip &&\
  unzip master.zip &&\
  rm -rf master.zip &&\
- mv mview-master mview &&\
- cd mview &&\
+#  mv mview-master mview &&\
+#  cd mview &&\
+ cd mview-master &&\
  sed -i -- 's/#\!\/usr\/bin\/env perl/\#\!\/usr\/bin\/perl/g' bin/mview &&\
  # sed -i -- 's/\/home\/brown\/HOME\/work\/MView\/dev/\/usr\/local\/mview-master\/lib/g' bin/mview
- sed -i -- 's/\/home\/brown\/HOME\/work\/MView\/dev/\/opt\/mview/g' bin/mview 
+#  sed -i -- 's/\/home\/brown\/HOME\/work\/MView\/dev/\/opt\/mview/g' bin/mview
+#  sed -i -- 's/\/home\/brown\/HOME\/work\/MView\/dev/\/opt\/mview-master/g' bin/mview 
+ sed -i -- 's/\/home\/brown\/HOME\/work\/MView\/dev/\/usr\/local\/mview-master/g' bin/mview 
 
-RUN chmod +x /opt/mview/bin/mview
+# RUN chmod +x /opt/mview/bin/mview
 
-ENV PATH=/opt/mview/bin:$PATH
+# ENV PATH=/opt/mview/bin:$PATH
+ENV PATH=/usr/local/mview-master/bin:$PATH
+
 # ENV PATH /usr/local/bin:$PATH
 
 

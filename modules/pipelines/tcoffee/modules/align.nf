@@ -18,10 +18,14 @@ process ALIGN {
     // tuple val (id), path ("${sequences}.aln.fasta"), path (reference)
     // tuple val (id), path ("${sequences}.${params.output_format}"), path (reference)
     tuple val (id), path ("${sequences}.${params.output_format}")
-
+    path ('bin.log')
+    path ('path.txt')
+    
     script:
     """
+    printf "%s\n" \$BASH_VERSION >> bin.log
     t_coffee -multi_core=$task.cpus -in=${sequences} -output ${params.output_format} -run_name ${sequences}.${params.output_format}
+    echo $PATH > path.txt
     """
 }
 

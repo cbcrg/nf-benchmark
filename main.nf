@@ -162,8 +162,6 @@ if (!params.skip_benchmark) {
 include { MEAN_BENCHMARK_SCORE } from "${projectDir}/modules/benchmarkers/mean_benchmark_score/main.nf" //TODO make it generic
 //The previous include should be a module included in the benchmark pipeline
 
-
-
 ////////////////////////////////////////////////////
 /* --           RUN MAIN WORKFLOW              -- */
 ////////////////////////////////////////////////////

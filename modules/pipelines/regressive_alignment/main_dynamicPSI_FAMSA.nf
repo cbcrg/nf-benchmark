@@ -1,7 +1,7 @@
 #!/usr/bin/env nextflow
 
 /*
- * Copyright (c) 2017-2020, Centre for Genomic Regulation (CRG) and the authors.
+ * Copyright (c) 2017-2021, Centre for Genomic Regulation (CRG) and the authors.
  *
  *   This file is part of 'XXXXXX'.
  *
@@ -31,7 +31,7 @@
 /* 
  * enables modules 
  */
-nextflow.enable.dsl = 2
+nextflow.preview.dsl = 2
 
 /*
  * defaults parameter definitions
@@ -43,40 +43,29 @@ top20fam="gluts,myb_DNA-binding,tRNA-synt_2b,biotin_lipoyl,hom,ghf13,aldosered,h
 //params.seqs ="/users/cn/egarriga/datasets/homfam/combinedSeqs/{${seq2improve}}.fa"
 
 // input sequences to align in fasta format
-params.seqs = "/users/cn/egarriga/datasets/homfam/combinedSeqs/{${top20fam}}.fa"
+//params.seqs = "/users/cn/egarriga/datasets/homfam/combinedSeqs/{seatoxin,hip,scorptoxin,cyt3,rnasemam,bowman,toxin,ghf11,TNF,sti}.fa"
 
-params.refs = "/users/cn/egarriga/datasets/homfam/refs/{${top20fam}}.ref"
+params.seqs = "/users/cn/egarriga/datasets/homfam/combinedSeqs/{cyt3,ghf11,sti}.fa"
 
-//params.trees ="/Users/edgargarriga/CBCRG/nf_regressive_modules/results/trees/*.dnd"
-params.trees = false
-                      //TODO FIX -> reg_UPP
-                      //CLUSTALO,FAMSA,MAFFT-FFTNS1,MAFFT-GINSI,MAFFT-SPARSECORE,MAFFT,MSAPROBS,PROBCONS,TCOFFEE,UPP,MUSCLE
-params.align_methods = "CLUSTALO,FAMSA,MAFFT-FFTNS1,MAFFT-GINSI,MAFFT-SPARSECORE,MAFFT,MSAPROBS,PROBCONS,TCOFFEE,UPP,MUSCLE"
+params.refs = "/users/cn/egarriga/datasets/homfam/refs/*.ref"
 
-//CLUSTALW-QUICK,CLUSTALW
-//FAMSA-SLINK,FAMSA-SLINKmedoid,FAMSA-SLINKparttree,FAMSA-UPGMA,FAMSA-UPGMAmedoid,FAMSA-UPGMAparttree
-//MAFFT-DPPARTTREE0,MAFFT-DPPARTTREE1,MAFFT-DPPARTTREE2,MAFFT-DPPARTTREE2size
-//MAFFT-FASTAPARTTREE,MAFFT-FFTNS1,MAFFT-FFTNS1mem,MAFFT-FFTNS2,MAFFT-FFTNS2mem
-//MAFFT-PARTTREE0,MAFFT-PARTTREE1,MAFFT-PARTTREE2,MAFFT-PARTTREE2size
-//MAFFT,MBED
-//TCOFFEE-BLENGTH,TCOFFEE-ISWLCAT,TCOFFEE-KM,TCOFFEE-LONGCAT,TCOFFEE-NJ,TCOFFEE-REG,TCOFFEE-SHORTCAT,TCOFFEE-SWL,TCOFFEE-SWLcat,TCOFFEE-UPGMA
+params.trees ="/users/cn/egarriga/datasets/homfam/trees/*.FAMSA.dnd"
+//params.trees = false
+                      //CLUSTALO,FAMSA,MAFFT-FFTNS1
+params.align_methods = "CLUSTALO"//,FAMSA,MAFFT-FFTNS1" 
+                      //MAFFT-DPPARTTREE0,FAMSA-SLINK,MBED,MAFFT-PARTTREE
+params.tree_methods = "MBED"      //TODO -> reuse trees for multiple methods.
 
-//TODO -> test tcoffee trees
-//     CLUSTALW-QUICK,CLUSTALW  -> not working on PROG bc they are not rooted
-
-                      //MAFFT-DPPARTTREE0,FAMSA-SLINK,MBED,MAFFT-PARTTREE0
-params.tree_methods = "FAMSA-SLINK"
-
-params.buckets = "30"
+params.buckets = "50"
 
 //  ## SLAVE parameters
                           //need to be lowercase -> direct to tcoffee
-                          //mbed,parttree,famsadnd,cwdnd,dpparttree,fastparttree,mafftdnd,fftns1dnd,fftns2dnd,nj
                           //mbed,parttree,famsadnd
-params.slave_tree_methods="cwdnd,dpparttree,fastparttree,mafftdnd,fftns1dnd,fftns2dnd,nj"
+params.slave_tree_methods="mbed,famsadnd,parttree" 
 
 //  ## DYNAMIC parameters
-params.dynamicX = "10000"                 //TODO -> make 2 list? one with aligners and the other with sizes? (to have more than 2 aligners)
+params.dynamicX = "100000"
+          //TODO -> make 2 list? one with aligners and the other with sizes? (to have more than 2 aligners)
 params.dynamicMasterAln="psicoffee_msa"
 params.dynamicMasterSize="50"
 params.dynamicSlaveAln="famsa_msa"
@@ -84,32 +73,26 @@ params.dynamicSlaveSize="100000000"
 params.dynamicConfig=true
 
           //uniref50, pdb or path
-params.db = "pdb"
-          // define default database path
-uniref_path = "/users/cn/egarriga/datasets/db/uniref50.fasta"   // cluster path
-pdb_path = "/database/pdb/pdb_seqres.txt"                       // docker path
+params.db = "uniref50"        
 
-
-params.progressive_align = true
-params.regressive_align = false
-
-params.compressAZ = false       //"-output fastaz_aln" 
-
-params.pool_align=false
-params.slave_align=false
-params.dynamic_align=false
+params.progressive_align = false
+params.regressive_align = false           //done
+params.pool_align=false                   //done
+params.slave_align=false    // ERROR _ child=parttree
+params.dynamic_align=true                //done
 
 params.evaluate=true
-params.homoplasy=false
+params.homoplasy=true
 params.gapCount=false
-params.metrics=false
-params.easel=false
+params.metrics=true
+params.easel=true
 
 // output directory
 params.outdir = "$baseDir/results"
 
-//blast call cached
-params.blastOutdir="$baseDir/blast"
+// define database path
+uniref_path = "/users/cn/egarriga/datasets/db/uniref50.fasta"   // cluster path
+pdb_path = "/database/pdb/pdb_seqres.txt"                       // docker path
 
 if (params.db=='uniref50'){
   params.database_path = uniref_path
@@ -131,7 +114,6 @@ log.info """\
          --##--
          Generate Progressive alignments                : ${params.progressive_align}
          Generate Regressive alignments                 : ${params.regressive_align}
-                  CompressAZ alignments                 : ${params.compressAZ}
          Generate Slave tree alignments                 : ${params.slave_align}
                   Slave tree methods                    : ${params.slave_tree_methods}
          Generate Dynamic alignments                    : ${params.dynamic_align}
@@ -154,83 +136,68 @@ log.info """\
          .stripIndent()
 
 // import analysis pipelines
-include { TREE_GENERATION } from './modules/treeGeneration'   params(params)
-include { REG_ANALYSIS } from './modules/reg_analysis'        params(params)
-include { PROG_ANALYSIS } from './modules/prog_analysis'      params(params)
-include { SLAVE_ANALYSIS } from './modules/reg_analysis'      params(params)
-include { DYNAMIC_ANALYSIS } from './modules/reg_analysis'    params(params)
-include { POOL_ANALYSIS } from './modules/reg_analysis'       params(params)
+include TREE_GENERATION from './modules/treeGeneration'        params(params)
+include REG_ANALYSIS from './modules/reg_analysis'        params(params)
+include PROG_ANALYSIS from './modules/prog_analysis'      params(params)
+include SLAVE_ANALYSIS from './modules/reg_analysis'      params(params)
+include DYNAMIC_ANALYSIS from './modules/reg_analysis'    params(params)
+include POOL_ANALYSIS from './modules/reg_analysis'       params(params)
 
 // Channels containing sequences
 seqs_ch = Channel.fromPath( params.seqs, checkIfExists: true ).map { item -> [ item.baseName, item] }
 
-refs_ch = Channel.empty()
 if ( params.refs ) {
   refs_ch = Channel.fromPath( params.refs ).map { item -> [ item.baseName, item] }
 }
 
 // Channels for user provided trees or empty channel if trees are to be generated [OPTIONAL]
 if ( params.trees ) {
-  input_trees = Channel.fromPath(params.trees)
-                       .map { item -> [ item.baseName.tokenize('.')[0], item.baseName.tokenize('.')[1], item] }
+  trees = Channel.fromPath(params.trees)
+    .map { item -> [ item.baseName.tokenize('.')[0], item.baseName.tokenize('.')[1], item] }
+}else { 
+  Channel.empty().set { trees }
 }
 
-// tokenize params
+// tokenize params 
 tree_method = params.tree_methods.tokenize(',')
 align_method = params.align_methods.tokenize(',')
-bucket_list = params.buckets.toString().tokenize(',')     //int to string
+bucket_list = params.buckets.toString().tokenize(',') //int to string
 slave_method = params.slave_tree_methods.tokenize(',')
-dynamicX = params.dynamicX.toString().tokenize(',')       //int to string
+dynamicX = params.dynamicX.toString().tokenize(',') //int to string
 
-/*
+/* 
  * main script flow
  */
 workflow pipeline {
 
-    def trees = params.trees? input_trees : TREE_GENERATION (seqs_ch, tree_method).trees
-
-    seqs_ch
+    if (!params.trees){
+      TREE_GENERATION (seqs_ch, tree_method) 
+      seqs_ch
+        .cross(TREE_GENERATION.out)
+        .map { it -> [ it[1][0], it[1][1], it[0][1], it[1][2] ] }
+        .set { seqs_and_trees }
+    }else{
+      seqs_ch
         .cross(trees)
         .map { it -> [ it[1][0], it[1][1], it[0][1], it[1][2] ] }
         .set { seqs_and_trees }
+    }
 
-    alignment_regressive_r = Channel.empty()
     if (params.regressive_align){
-        REG_ANALYSIS(seqs_and_trees, refs_ch, align_method, tree_method, bucket_list)
-        alignment_regressive_r = REG_ANALYSIS.out.alignment
+      REG_ANALYSIS(seqs_and_trees, refs_ch, align_method, tree_method, bucket_list)
     }
-
-    alignment_progressive_r = Channel.empty()
-
     if (params.progressive_align){
-        PROG_ANALYSIS(seqs_and_trees, refs_ch, align_method, tree_method)
-        alignment_progressive_r = PROG_ANALYSIS.out.alignment
+      PROG_ANALYSIS(seqs_and_trees, refs_ch, align_method, tree_method)
     }
-
-    alignment_slave_r = Channel.empty()
     if (params.slave_align){
-        SLAVE_ANALYSIS(seqs_and_trees, refs_ch, align_method, tree_method, bucket_list, slave_method)
-        alignment_slave_r = SLAVE_ANALYSIS.out.alignment
+      SLAVE_ANALYSIS(seqs_and_trees, refs_ch, align_method, tree_method, bucket_list, slave_method)
     }
-
-    alignment_dynamic_r = Channel.empty()
     if (params.dynamic_align){
       DYNAMIC_ANALYSIS(seqs_and_trees, refs_ch, tree_method, bucket_list, dynamicX)
-      alignment_dynamic_r = DYNAMIC_ANALYSIS.out.alignment
     }
-
-    alignment_pool_r = Channel.empty()
     if (params.pool_align){
       POOL_ANALYSIS(seqs_and_trees, refs_ch, align_method, tree_method, bucket_list)
-      alignment_pool_r = POOL_ANALYSIS.out.alignment
     }
-
-    emit:
-    alignment_regressive = alignment_regressive_r
-    alignment_progressive = alignment_progressive_r
-    alignment_slave = alignment_slave_r
-    alignment_dynamic = alignment_dynamic_r
-    alignment_pool = alignment_pool_r
 }
 
 workflow {

@@ -12,7 +12,7 @@ process REG_ALIGNER {
     //publishDir "${params.outdir}/templates", pattern: '*.prf'
 
     input:
-    tuple val(id), val(tree_method), file(seqs), file(guide_tree), file(template), file(library)
+    tuple val(id), val(tree_method), file(seqs), file(guide_tree)
     each align_method
     each bucket_size
 
@@ -23,17 +23,16 @@ process REG_ALIGNER {
     tuple val (id), path ("${id}.*.aln"), emit: alignmentFile
     path "${id}.homoplasy", emit: homoplasyFile
     path ".command.trace", emit: metricFile
+    path "time.txt", emit: timeFile
     //path "*.template_list", emit: templateFile
     //path "*.prf", emit: templateProfile
     
-
     script:
     template "${path_templates}/regressive_align/reg_${align_method}.sh"   
 }
 
 process PROG_ALIGNER {
-    //container 'edgano/tcoffee:pdb'
-    container 'cbcrg/tcoffee@sha256:d249920bffdf9645bebac06225e13ee4407dc7410c60380ff51a8479325cd11f'
+    container 'edgano/tcoffee:pdb'
     tag "$align_method - $tree_method on $id"
     publishDir "${params.outdir}/alignments", pattern: '*.aln'
 
@@ -47,13 +46,12 @@ process PROG_ALIGNER {
     tuple val (id), path ("${id}.prog.*.tree.aln"), emit: alignmentFile
     path ".command.trace", emit: metricFile
 
-    script:    
-    template "${path_templates}/progressive_align/prog_${align_method}.sh"        
+    script:
+    template "${path_templates}/progressive_align/prog_${align_method}.sh"
 }
 
 process SLAVE_ALIGNER {
-    // container 'edgano/tcoffee:pdb'
-    container 'cbcrg/tcoffee@sha256:d249920bffdf9645bebac06225e13ee4407dc7410c60380ff51a8479325cd11f'
+    container 'edgano/tcoffee:pdb'
     tag "$align_method - $tree_method - $slave_method - $bucket_size on $id"
     publishDir "${params.outdir}/alignments", pattern: '*.aln'
 
@@ -76,8 +74,7 @@ process SLAVE_ALIGNER {
 }
 
 process DYNAMIC_ALIGNER {
-    // container 'edgano/tcoffee:pdb'
-    container 'cbcrg/tcoffee@sha256:d249920bffdf9645bebac06225e13ee4407dc7410c60380ff51a8479325cd11f'
+    container 'edgano/tcoffee:pdb'
     tag "$align_method - $tree_method on $id"
     publishDir "${params.outdir}/alignments", pattern: '*.aln'
     label 'process_medium'
@@ -105,8 +102,7 @@ process DYNAMIC_ALIGNER {
 }
 
 process POOL_ALIGNER {
-    // container 'edgano/tcoffee:pdb'
-    container 'cbcrg/tcoffee@sha256:d249920bffdf9645bebac06225e13ee4407dc7410c60380ff51a8479325cd11f'
+    container 'edgano/tcoffee:pdb'
     tag "$align_method - $tree_method - $bucket_size on $id"
     publishDir "${params.outdir}/alignments", pattern: '*.aln'
 

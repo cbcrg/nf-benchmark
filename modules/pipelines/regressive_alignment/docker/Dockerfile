@@ -1,7 +1,8 @@
 FROM debian:jessie
-MAINTAINER Edgar Garriga <edgano@gmail.com>
+LABEL MAINTAINER "Edgar Garriga <edgano@gmail.com>"
+LABEL MAINTAINER "Jose Espinosa-Carrasco <espinosacarrascoj@gmail.com>"
+LABEL IMAGE_NAME "cbcrg/tcoffee:nfb0.1"
 
-## 'edgano/tcoffee:pdb'
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
       ed \
@@ -26,6 +27,9 @@ RUN apt-get update && \
       r-base \
       r-recommended
 
+RUN mkdir -p /opt/bin
+ENV PATH "$PATH:/opt/bin"
+
 #install R packages
 RUN R -e "install.packages('seqinr', repos='http://R-Forge.R-project.org')"
 RUN R -e "install.packages('ape', repos = 'http://ape-package.ird.fr/')"
@@ -40,10 +44,12 @@ RUN wget http://prdownloads.sourceforge.net/argtable/argtable2-13.tar.gz && \
     rm /argtable2-13.tar.gz
 
 # Install BLAST+
-RUN wget https://ftp.ncbi.nlm.nih.gov/blast/executables/blast+/LATEST/ncbi-blast-2.10.1+-x64-linux.tar.gz && \
+# RUN wget https://ftp.ncbi.nlm.nih.gov/blast/executables/blast+/LATEST/ncbi-blast-2.10.1+-x64-linux.tar.gz && \
+RUN wget https://ftp.ncbi.nlm.nih.gov/blast/executables/blast+/2.10.1/ncbi-blast-2.10.1+-x64-linux.tar.gz && \
     tar -xvf ncbi-blast-2.10.1+-x64-linux.tar.gz && \
     rm ncbi-blast-2.10.1+-x64-linux.tar.gz && \
-    cp ncbi-blast-2.10.1+/bin/* /usr/bin/.
+    # cp ncbi-blast-2.10.1+/bin/* /usr/bin/.
+    cp ncbi-blast-2.10.1+/bin/* /opt/bin/.
     
 # Install PDB DDBB
 RUN mkdir -p /database/pdb && \
@@ -59,13 +65,15 @@ RUN wget http://www.clustal.org/omega/clustal-omega-1.2.4.tar.gz && \
     ./configure && \
     make && \
     make install && \
+    cp /usr/local/bin/clustalo /opt/bin/. && \
     rm /clustal-omega-1.2.4.tar.gz
 
 #install CLUSTALO w1
 RUN wget http://www.clustal.org/download/1.X/ftp-igbmc.u-strasbg.fr/pub/ClustalW/clustalw1.83.linux.tar.gz && \
     tar -zxf clustalw1.83.linux.tar.gz && \
     cd clustalw1.83.linux && \
-    cp clustalw /bin/. && \
+    # cp clustalw /bin/. && \
+    cp clustalw /opt/bin/. && \
     rm /clustalw1.83.linux.tar.gz
 
 #install CLUSTAL w2
@@ -75,14 +83,16 @@ RUN wget http://www.clustal.org/download/current/clustalw-2.1.tar.gz && \
     ./configure && \
     make && \
     make install && \
-    rm /clustalw-2.1.tar.gz
+    rm /clustalw-2.1.tar.gz && \
+    cp /usr/local/bin/clustalw2 /opt/bin/.
 
 #install fasta35 (needed for mafft)
 RUN wget https://faculty.virginia.edu/wrpearson/fasta/fasta33-35/fasta-35.4.12.tar.gz --no-check-certificate && \
     tar -zxf fasta-35.4.12.tar.gz && \
     cd fasta-35.4.12/src && \
     make -f ../make/Makefile.linux_sse2 && \
-    cp ../bin/* /bin/. && \
+    # cp ../bin/* /bin/. && \
+    cp ../bin/* /opt/bin/. && \
     rm /fasta-35.4.12.tar.gz
 
 # install MAFFT
@@ -98,7 +108,8 @@ RUN wget http://mafft.cbrc.jp/alignment/software/mafft-7.397-with-extensions-src
     chmod +x newick2mafft.rb && \
     cp newick2mafft.rb /bin/. && \
     export "PATH=$PATH:/mafft/bin" && \ 
-    cp /mafft/bin/* /bin/. && \
+    # cp /mafft/bin/* /bin/. && \
+    cp /mafft/bin/* /opt/bin/. && \
     mv /mafft-7.397-with-extensions /mafft && \
     rm /mafft-7.397-with-extensions-src.tgz
 
@@ -107,7 +118,8 @@ RUN wget https://drive5.com/muscle/downloads3.8.31/muscle3.8.31_i86linux32.tar.g
     tar zxf muscle3.8.31_i86linux32.tar.gz && \
     mv muscle3.8.31_i86linux32 muscle && \
     rm muscle3.8.31_i86linux32.tar.gz && \
-    mv muscle /bin/
+    # mv muscle /bin/
+    mv muscle /opt/bin/.
 
 # Install PROBCONS
 RUN apt-get update \
@@ -119,7 +131,8 @@ RUN wget "https://downloads.sourceforge.net/project/msaprobs/MSAProbs-0.9.7.tar.
     tar zxf msaprobs.tar.gz && \
     cd MSAProbs-0.9.7/MSAProbs && \ 
     make && \
-    cp msaprobs /usr/bin && \
+    # cp msaprobs /usr/bin && \
+    cp msaprobs /opt/bin/. && \
     rm /msaprobs.tar.gz
 
 # install UPP 
@@ -144,8 +157,10 @@ RUN git clone http://github.com/smirarab/sepp.git && \
     sed -i "s/root/home/g" /sepp/.sepp/upp.config && \
     cd /pasta-code/pasta && \
     python setup.py develop && \
-    cp /sepp/run_*.py /bin/. && \
-    chmod 777 /bin/run_*.py
+    # cp /sepp/run_*.py /bin/. && \
+    # chmod 777 /bin/run_*.py 
+    cp /sepp/run_*.py /opt/bin/. && \
+    chmod 777 /opt/bin/run_*.py 
     
 
 # Install MSA
@@ -167,22 +182,25 @@ RUN git clone https://github.com/refresh-bio/FAMSA.git && \
   sed -i 's/NO_AVX2 = false/NO_AVX2 = true/' makefile && \
   sed -i 's/NO_GPU = false/NO_GPU = true/' makefile && \
   make && \
-  cp famsa /bin/.
+#   cp famsa /bin/.
+  cp famsa /opt/bin/.
     
 # Install TCOFFEE
 RUN git clone https://github.com/cbcrg/tcoffee.git tcoffee && \
     cd tcoffee && \
-    git checkout a798cb9f31609d8611508b91ceca75db6e336533 && \
+    git checkout 849521af75c0e77bc9248ab3dd88967501b2584a && \
     cd t_coffee/src && \
     make t_coffee && \
-    cp t_coffee /bin/.
+    # cp t_coffee /bin/.
+    cp t_coffee /opt/bin/.
     #cp t_coffee *.pl /bin/. && \
     #mkdir /tmp/cache && mkdir /tmp/lock && \
 
 # Download scripts
 RUN wget https://raw.githubusercontent.com/edgano/datasets-test/scripts/replace_U.pl && \
-   chmod 777 replace_U.pl && \
-   mv replace_U.pl /bin/.
+    chmod 777 replace_U.pl && \
+#    mv replace_U.pl /bin/.
+    mv replace_U.pl /opt/bin/.
 
 
 ENV HOME '/'

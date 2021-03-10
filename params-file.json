@@ -1,0 +1,6 @@
+{"pipeline": "tcoffee",
+ "pipeline_output_name": "alignment",
+ "regressive_align": false,
+ "align_methods": "CLUSTALO",
+ "evaluate": false
+}

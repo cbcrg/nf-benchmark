@@ -1,7 +1,5 @@
 #!/bin/bash
 
-declare -a path="/nfs/users2/cn/egarriga/nf_regressive_modules/results"
-
 #################
 ## FAMILY NAME ##
 #################
@@ -19,29 +17,30 @@ declare -a all=(seatoxin hip     scorptoxin      cyt3    rnasemam        bowman 
 ################
 ##  ALIGNERS  ##
 ################
-# declare -a aligner=(tcoffee_msa.100_famsa_msa.100000000_uniref50) # psicoffee_msa.50_famsa_msa.100000000_uniref50)
-# cynamic.35_100000.psicoffee_msa.50_famsa_msa.100000000_uniref50.with.FAMSA.tree.tc
-declare -a aligner=(psicoffee_msa.50_famsa_msa.100000000_uniref50)
+declare -a aligner=(CLUSTALO MAFFT-FFTNS1 FAMSA) #(CLUSTALO MAFFT-FFTNS1 FAMSA)
 
 ################
 ##    TREES   ##
 ################   
-declare -a tree=(FAMSA)
+declare -a tree=(MBED MAFFT-PARTTREE0 FAMSA-SLINK MAFFT-DPPARTTREE0)
+#             (codnd dpparttreednd1 dpparttreednd2 dpparttreednd2size fastaparttreednd fftns1dnd fftns1dndmem fftns2dnd fftns2dndmem mafftdnd parttreednd0 parttreednd1 parttreednd2 parttreednd2size)
 
 ###############
 ##   Nseq    ##
 ###############
-#declare -a bucket=(20_100000 35_100000 50_100000 100_100000) 
-declare -a bucket=(35_100000 50_100000)
+declare -a bucket=(1000) #(1000 3000 5000 10000 20000)
+#               (NA)        -> for PROG
+#               (1000 3000 5000)
+
 ##############
 ## Prog/REG ##
 ##############
-declare -a flavour="dynamic"
+declare -a flavour="regressive" #"prog_align"  #"reg_align"  
 
 printf "\t\t########################\n"
 printf "\t\t######### TC ###########\n"
 printf "\t\t########################\n"
-
+printf "\n"
 #####
 ###   ALIG |  CO  |  CO  |  CO  |  CO  |
 ###   TREE | mBed | mBed |  PT  |  PT  |
@@ -100,110 +99,12 @@ do
         do
           for nSeq in ${bucket[@]}  ## loop all the buckets
           do
-            cat ${path}/score/tc/${family}.${flavour}.${nSeq}.${align_method}.with.${tree_method}.tree.tc | tr '' ';'| tr -d "[:space:]"
+            wc -c ./alignments/${family}.${flavour}.${nSeq}.${align_method}.with.${tree_method}.tree.aln | awk '{print $1}'| tr '' ';'| tr -d "[:space:]"
+ ## wc -c seatoxin.reg_1000.CLUSTALO.with.MBED.tree.aln | awk '{print $1}'| tr '' ';'| tr -d "[:space:]" 
             printf ";" 
           done
        	done
     done
     printf "\n"
 done
-
 printf "\n"
-printf "\t\t########################\n"
-printf "\t\t## Homoplasy -- EASEL ##\n"
-printf "\t\t########################\n"
-printf "\n"
-## print 1st line -> ALIGN
-printf "ALIG;"
-for x in ${aligner[@]} 
-do
-  for y in ${tree[@]}
-  do
-    for z in ${bucket[@]}
-    do
-      for i in {1..7}
-      do
-        printf ${x}";"
-      done
-    done
-  done
-done
-printf "\n"
-
-#print 2nd line -> TREE
-printf "TREE;"
-for x in ${aligner[@]}
-do
-  for y in ${tree[@]}
-  do
-    for z in ${bucket[@]}
-    do
-      for i in {1..7}
-      do
-        printf ${y}";"
-      done
-    done
-  done
-done
-printf "\n"
-
-##print 3r line -> nSeq
-printf "nSeq;"
-for x in ${aligner[@]}
-do
-  for y in ${tree[@]}
-  do
-    for z in ${bucket[@]}
-    do
-      for i in {1..7}
-      do
-        printf ${z}";"
-      done
-    done
-  done
-done
-printf "\n"
-##print 4r line -> homoplasy
-printf "nSeq;"
-for x in ${aligner[@]}
-do
-  for y in ${tree[@]}
-  do
-    for z in ${bucket[@]}
-    do
-      printf "avgID;len;ngap;ngap2;homo;w_homo;w_homo2;"
-    done
-  done
-done
-
-printf "\n\n"
-
-for family in ${all[@]} ## loop for all families
-do
-  printf "${family};"
-  
-	for align_method in ${aligner[@]} ## loop each alignment
-    do
-        for tree_method in ${tree[@]} ## loop each tree
-        do
-          for nSeq in ${bucket[@]}  ## loop all the buckets
-          do
-            cat ${path}/easel/${family}.${flavour}.${nSeq}.${align_method}.with.${tree_method}.tree.avgId | tr '' ';'| tr -d "[:space:]"
-            printf ";" 
-            cat ${path}/homoplasy/${family}.${flavour}.${nSeq}.${align_method}.with.${tree_method}.tree.len | tr '' ';'| tr -d "[:space:]"
-            printf ";" 
-            cat ${path}/homoplasy/${family}.${flavour}.${nSeq}.${align_method}.with.${tree_method}.tree.ngap | tr '' ';'| tr -d "[:space:]"
-            printf ";" 
-            cat ${path}/homoplasy/${family}.${flavour}.${nSeq}.${align_method}.with.${tree_method}.tree.ngap2 | tr '' ';'| tr -d "[:space:]"
-            printf ";" 
-            cat ${path}/homoplasy/${family}.${flavour}.${nSeq}.${align_method}.with.${tree_method}.tree.homo | tr '' ';'| tr -d "[:space:]"
-            printf ";" 
-            cat ${path}/homoplasy/${family}.${flavour}.${nSeq}.${align_method}.with.${tree_method}.tree.w_homo | tr '' ';'| tr -d "[:space:]"
-            printf ";" 
-            cat ${path}/homoplasy/${family}.${flavour}.${nSeq}.${align_method}.with.${tree_method}.tree.w_homo2 | tr '' ';'| tr -d "[:space:]"
-            printf ";" 
-          done
-       	done
-    done
-    printf "\n"
-done

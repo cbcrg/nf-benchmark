@@ -17,12 +17,12 @@ declare -a all=(seatoxin hip     scorptoxin      cyt3    rnasemam        bowman 
 ################
 ##  ALIGNERS  ##
 ################
-declare -a aligner=(MAFFT-SPARSECORE) #(CLUSTALO MAFFT-FFTNS1 FAMSA)
+declare -a aligner=(CLUSTALO MAFFT-FFTNS1 FAMSA) #(CLUSTALO MAFFT-FFTNS1 FAMSA)
 
 ################
 ##    TREES   ##
 ################   
-declare -a tree=(CLUSTALO MAFFT_PARTTREE FAMSA)
+declare -a tree=(MBED MAFFT-PARTTREE0 FAMSA-SLINK MAFFT-DPPARTTREE0)
 #             (codnd dpparttreednd1 dpparttreednd2 dpparttreednd2size fastaparttreednd fftns1dnd fftns1dndmem fftns2dnd fftns2dndmem mafftdnd parttreednd0 parttreednd1 parttreednd2 parttreednd2size)
 
 ###############
